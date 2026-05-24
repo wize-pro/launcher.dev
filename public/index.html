@@ -1341,9 +1341,15 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
         </div>
       </div>
 
+      <!-- Language -->
+      <div class="settings-section">
+        <div class="settings-section-title" data-i18n="settings.language.label">Language</div>
+        <select class="settings-input" id="cfg-lang" onchange="setLang(this.value)"></select>
+      </div>
+
       <!-- About -->
       <div class="settings-section">
-        <div class="settings-section-title">À propos</div>
+        <div class="settings-section-title" data-i18n="settings.about">About</div>
         <div class="settings-hint" id="about-version">Dev Launcher</div>
       </div>
 
@@ -1610,6 +1616,33 @@ async function initI18n() {
   localStorage.setItem('dlLang', lang);
   await Promise.all([loadCatalog('en'), loadCatalog(lang)]);
   applyTranslations();
+}
+
+async function populateLangSelector() {
+  const sel = document.getElementById('cfg-lang');
+  if (!sel) return;
+  const locales = await fetch('/api/locales').then(r => r.json()).catch(() => []);
+  sel.innerHTML = locales.map(l =>
+    `<option value="${l.code}"${l.code === LANG ? ' selected' : ''}>${l.name}</option>`
+  ).join('');
+}
+
+async function setLang(lang) {
+  LANG = lang;
+  localStorage.setItem('dlLang', lang);
+  await loadCatalog(lang);
+  fetch('/api/settings', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lang }),
+  }).catch(() => {});
+  applyTranslations();
+  rerenderDynamic();
+}
+
+// Re-render views that build HTML in JS so a live language switch updates them too.
+function rerenderDynamic() {
+  loadProjects();
+  renderIdeSettings();
 }
 
 // ══ State ══════════════════════════════════════════════════════════════════
@@ -3084,12 +3117,13 @@ async function openSettings() {
     defaultIdeId  = s.defaultIde || defaultIdeId;
     renderIdeSettings();
   } catch(e) { console.warn(e); }
-  // Version de l'application (À propos)
+  await populateLangSelector();
+  // Version de l'application (About)
   try {
     const v = await fetch('/api/version').then(r => r.json());
     const el = document.getElementById('about-version');
-    if (el) el.innerHTML = `Dev Launcher <strong>v${v.version}</strong> · version de développement (pré-1.0, peut contenir des changements cassants)`;
-  } catch(e) { console.warn(e); }
+    if (el) el.textContent = t('about.version', { version: v.version });
+  } catch (e) { console.warn(e); }
 }
 
 function closeSettings() {
