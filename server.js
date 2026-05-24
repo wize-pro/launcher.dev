@@ -86,7 +86,7 @@ const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 // Default values from launcher.config.js
 const SETTINGS_DEFAULTS = {
-  devRoot:    config.devRoot,
+  devRoots:   [config.devRoot],
   scanDepth:  config.scanDepth,
   ignoreDirs: config.ignoreDirs,
   ides: [
@@ -98,7 +98,7 @@ const SETTINGS_DEFAULTS = {
   // Active UI/server language (locale code). null = not chosen yet → client detects it.
   lang: null,
   // Persisted data schema version (handles migrations). See runMigrations().
-  schemaVersion: 1,
+  schemaVersion: 2,
 };
 
 // Current data schema version. Increment on every change to the JSON file format,
