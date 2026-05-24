@@ -1,0 +1,15 @@
+name: "Dev Launcher"
+description: "Interface web locale pour lancer les projets dev"
+tags: [node, tools]
+color: "#6366f1"
+
+commands:
+  dev:
+    label: "Dev (watch)"
+    cmd: "node --watch server.js"
+    port: 4242
+
+  start:
+    label: "Start"
+    cmd: "node server.js"
+    port: 4242

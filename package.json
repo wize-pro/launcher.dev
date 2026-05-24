@@ -1,0 +1,31 @@
+{
+  "name": "dev-launcher",
+  "version": "0.1.0",
+  "description": "Local web launcher for dev projects",
+  "main": "main.js",
+  "author": "Hassan Rihan",
+  "license": "MIT",
+  "keywords": [
+    "launcher",
+    "developer-tools",
+    "electron",
+    "tray",
+    "project-manager"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "app": "electron .",
+    "app:dev": "NODE_ENV=development electron ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "electron": "^42.0.0"
+  }
+}

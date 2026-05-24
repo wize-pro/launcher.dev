@@ -1,0 +1,68 @@
+# ─────────────────────────────────────────────────────────────
+# Exemple de .launcher.yml
+# Copie ce fichier à la racine de ton projet, renomme-le .launcher.yml
+# et adapte les commandes.
+# ─────────────────────────────────────────────────────────────
+
+name: "Mon Projet"
+description: "Une courte description optionnelle"
+
+# Tags libres — servent de filtres dans l'interface
+tags: [backend, dotnet, work]
+
+# Couleur de la barre latérale de la carte (optionnel)
+# Couleurs suggérées :
+#   #6366f1 violet (défaut)  |  #22c55e vert   |  #f59e0b jaune
+#   #3b82f6 bleu             |  #ef4444 rouge  |  #ec4899 rose
+color: "#6366f1"
+
+# Commandes disponibles (clé libre, tu peux en mettre autant que tu veux)
+commands:
+
+  # ── .NET ──────────────────────────────────────────────────
+  dev:
+    label: "Dev local"
+    cmd: "dotnet run"
+    cwd: "./src/MonApi"    # chemin relatif à la racine du projet
+    port: 5000             # optionnel — affiche un lien cliquable vers localhost:PORT
+
+  watch:
+    label: "Dev (watch)"
+    cmd: "dotnet watch run"
+    cwd: "./src/MonApi"
+    port: 5000
+
+  # ── Docker ────────────────────────────────────────────────
+  docker:
+    label: "Docker Compose"
+    cmd: "docker-compose up"
+    # pas de cwd = racine du projet
+    port: 8080
+
+  docker-build:
+    label: "Docker Compose (rebuild)"
+    cmd: "docker-compose up --build"
+    port: 8080
+
+  # ── Node / Frontend ───────────────────────────────────────
+  # dev:
+  #   label: "Dev (Vite)"
+  #   cmd: "npm run dev"
+  #   port: 5173
+
+  # build:
+  #   label: "Build"
+  #   cmd: "npm run build"
+
+  # ── Python ────────────────────────────────────────────────
+  # dev:
+  #   label: "FastAPI dev"
+  #   cmd: "uvicorn main:app --reload"
+  #   cwd: "./src"
+  #   port: 8000
+
+  # venv:
+  #   label: "FastAPI (venv)"
+  #   cmd: "venv/bin/uvicorn main:app --reload"
+  #   cwd: "./src"
+  #   port: 8000
