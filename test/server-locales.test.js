@@ -27,4 +27,5 @@ test('GET /locales/fr.json is served statically', async () => {
   assert.strictEqual(json['settings.title'], 'Paramètres');
 });
 
-after(() => process.exit(0));
+const { server } = require('../server.js');
+after(() => { server.close(); server.closeAllConnections(); });

@@ -1297,7 +1297,7 @@ app.delete('/api/favorites/:id', (req, res) => {
 
 // Écoute UNIQUEMENT sur la loopback (jamais 0.0.0.0). Ne pas changer sans
 // comprendre que /api/launch exécute des commandes shell arbitraires.
-app.listen(config.port, '127.0.0.1', () => {
+const server = app.listen(config.port, '127.0.0.1', () => {
   console.log(`\n🚀 Dev Launcher → http://localhost:${config.port}`);
   console.log(`📁 Registre : ${registry.length} projet${registry.length !== 1 ? 's' : ''} importé${registry.length !== 1 ? 's' : ''}`);
   if (registry.length > 0) {
@@ -1331,4 +1331,4 @@ process.on('SIGINT',  shutdownStandalone);
 process.on('SIGTERM', shutdownStandalone);
 
 // Exporté pour qu'Electron puisse nettoyer les processus sur app.before-quit.
-module.exports = { killAllInstances };
+module.exports = { killAllInstances, server };
