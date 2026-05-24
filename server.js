@@ -70,56 +70,14 @@ app.use('/locales', express.static(LOCALES_DIR));
 
 // ─── Settings (persisted in settings.json) ────────────────────────────────────
 
+const settingsLib = require('./lib/settings.js');
+const { SETTINGS_DEFAULTS, CURRENT_SCHEMA_VERSION } = settingsLib;
+
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
-// Default values from launcher.config.js
-const SETTINGS_DEFAULTS = {
-  devRoots:   [config.devRoot],
-  scanDepth:  config.scanDepth,
-  ignoreDirs: config.ignoreDirs,
-  ides: [
-    { id: 'vscode',   name: 'VS Code',   cmd: 'code'      },
-    { id: 'cursor',   name: 'Cursor',    cmd: 'cursor'    },
-    { id: 'windsurf', name: 'Windsurf',  cmd: 'windsurf'  },
-  ],
-  defaultIde: 'vscode',
-  // Active UI/server language (locale code). null = not chosen yet → client detects it.
-  lang: null,
-  // Persisted data schema version (handles migrations). See runMigrations().
-  schemaVersion: 2,
-};
-
-// Current data schema version. Increment on every change to the JSON file format,
-// and add a corresponding step in MIGRATIONS below.
-const CURRENT_SCHEMA_VERSION = SETTINGS_DEFAULTS.schemaVersion;
-
-function loadSettings() {
-  try {
-    if (fs.existsSync(SETTINGS_FILE)) {
-      const raw = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-      return { ...SETTINGS_DEFAULTS, ...raw };
-    }
-  } catch (e) {
-    console.warn('⚠️  Cannot read settings.json:', e.message);
-  }
-  return { ...SETTINGS_DEFAULTS };
-}
-
-function saveSettings(data) {
-  const toSave = {};
-  for (const key of Object.keys(SETTINGS_DEFAULTS)) {
-    if (data[key] !== undefined) toSave[key] = data[key];
-  }
-  // Validate ides
-  if (toSave.ides && (!Array.isArray(toSave.ides) || toSave.ides.some(i => !i.id || !i.name || !i.cmd))) {
-    delete toSave.ides;
-  }
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(toSave, null, 2), 'utf8');
-  return toSave;
-}
-
 // Active settings (mutable at runtime)
-let settings = loadSettings();
+let settings = settingsLib.loadSettings(SETTINGS_FILE);
+const saveSettings = (data) => settingsLib.saveSettings(SETTINGS_FILE, data);
 
 // ─── Categories (persisted in categories.json) ────────────────────────────────
 
@@ -137,72 +95,16 @@ const saveRegistry = () => registryLib.saveRegistry(PROJECTS_FILE, registry);
 
 // ─── Data schema & migrations ─────────────────────────────────────────────────
 
-// Migration v1: rewrites the registry to the canonical schema (removes tags/typeOverride).
-function migrateRegistryToCanonical() {
-  let changed = false;
-  registry = registry.map(p => {
-    const n = normalizeProject(p);
-    if (JSON.stringify(n) !== JSON.stringify(p)) changed = true;
-    return n;
-  });
-  if (changed) saveRegistry();
-}
-
-// Migration v2: replaces the legacy scalar `devRoot` with a `devRoots` array.
-function migrateSettingsToMultiRoot() {
-  let raw = {};
-  try {
-    if (fs.existsSync(SETTINGS_FILE)) raw = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-  } catch {}
-  if (typeof raw.devRoot === 'string' && !Array.isArray(raw.devRoots)) {
-    settings.devRoots = [raw.devRoot];
-    delete settings.devRoot;
-    saveSettings(settings);
-  }
-}
-
-const MIGRATIONS = {
-  1: migrateRegistryToCanonical,
-  2: migrateSettingsToMultiRoot,
+const migrationCtx = {
+  paths: { SETTINGS_FILE, PROJECTS_FILE },
+  store: {
+    get settings(){ return settings; }, set settings(v){ settings = v; },
+    get registry(){ return registry; }, set registry(v){ registry = v; },
+  },
+  saveSettings: (d) => settingsLib.saveSettings(SETTINGS_FILE, d),
+  saveRegistry,
 };
-
-// Reads the schema version actually stored in settings.json (without merging defaults),
-// to distinguish a legacy file from a fresh install.
-function rawSchemaVersion() {
-  try {
-    if (fs.existsSync(SETTINGS_FILE)) {
-      const raw = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-      return Number.isInteger(raw.schemaVersion) ? raw.schemaVersion : 0;
-    }
-  } catch {}
-  return null; // no settings file
-}
-
-function runMigrations() {
-  const rawV = rawSchemaVersion();
-  let from;
-  if (rawV === null) {
-    // No settings.json: fresh install (nothing to migrate) unless a legacy projects.json
-    // already exists → start from 0 to normalize it.
-    from = fs.existsSync(PROJECTS_FILE) ? 0 : CURRENT_SCHEMA_VERSION;
-  } else {
-    from = rawV;
-  }
-
-  if (from < CURRENT_SCHEMA_VERSION) {
-    console.log(`[migration] data schema ${from} → ${CURRENT_SCHEMA_VERSION}`);
-    for (let v = from + 1; v <= CURRENT_SCHEMA_VERSION; v++) {
-      if (MIGRATIONS[v]) { MIGRATIONS[v](); console.log(`[migration] step v${v} applied`); }
-    }
-  }
-
-  // Always stamp the current version into settings.json
-  settings.schemaVersion = CURRENT_SCHEMA_VERSION;
-  saveSettings(settings);
-  settings = loadSettings();
-}
-
-runMigrations();
+settingsLib.runMigrations(migrationCtx);
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
