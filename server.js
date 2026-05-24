@@ -7,6 +7,7 @@ const { spawn, spawnSync } = require('child_process');
 const config = require('./launcher.config');
 const pkg = require('./package.json');
 const i18n = require('./public/i18n.js');
+const { loadCatalogs } = require('./lib/i18n.js');
 
 // Where to persist user data (projects.json, settings.json, …). In a PACKAGED
 // Electron build the source directory is read-only (inside the app bundle/asar),
@@ -24,26 +25,7 @@ if (process.versions.electron) {
 // ─── Locale catalogs ───────────────────────────────────────────────────────────
 const LOCALES_DIR = path.join(__dirname, 'locales');
 
-function loadCatalogs() {
-  const catalogs = {};
-  try {
-    for (const f of fs.readdirSync(LOCALES_DIR)) {
-      if (!f.endsWith('.json')) continue;
-      const code = f.replace(/\.json$/, '');
-      try {
-        catalogs[code] = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, f), 'utf8'));
-      } catch (e) {
-        console.warn(`Failed to parse locale ${f}: ${e.message}`);
-      }
-    }
-  } catch (e) {
-    console.warn(`Cannot read locales directory: ${e.message}`);
-  }
-  if (!catalogs.en) catalogs.en = {};
-  return catalogs;
-}
-
-let catalogs = loadCatalogs();
+let catalogs = loadCatalogs(LOCALES_DIR);
 
 // Translate a key using the given language (defaults to the active settings language).
 // NOTE: relies on the module-level `settings` (declared later); must not be called during
