@@ -2,19 +2,19 @@ const os = require('os');
 const path = require('path');
 
 module.exports = {
-  // Racine où scanner les projets (modifie ce chemin si besoin)
+  // Root directory to scan for projects (change this path if needed)
   devRoot: path.join(os.homedir(), 'dev'),
 
-  // Profondeur max de scan (1 = direct, 2 = un sous-dossier, etc.)
-  // dev/RAC/IsiracNetApi/isirac-gate = 3 niveaux → scanDepth 5 pour couvrir large
+  // Maximum scan depth (1 = direct children, 2 = one sub-folder, etc.)
+  // dev/RAC/IsiracNetApi/isirac-gate = 3 levels → scanDepth 5 for broad coverage
   scanDepth: 5,
 
-  // Port du launcher web (surchargeable via la variable d'env PORT)
+  // Web launcher port (overridable via the PORT env variable)
   port: Number(process.env.PORT) || 4242,
 
-  // Nom du fichier de config dans chaque projet
+  // Config file name within each project
   configFile: '.launcher.yml',
 
-  // Dossiers à ignorer lors du scan
+  // Directories to ignore during scan
   ignoreDirs: ['node_modules', '.git', 'dist', 'build', 'bin', 'obj', '.next', '__pycache__', 'venv', '.venv'],
 };
