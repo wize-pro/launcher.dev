@@ -1373,7 +1373,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ac)">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
-      <span class="import-title" id="import-title">Importer un projet</span>
+      <span class="import-title" id="import-title" data-i18n="import.title">Import a project</span>
       <button class="settings-close" onclick="closeImportPanel()">✕</button>
     </div>
     <div class="import-body" id="import-body">
@@ -1381,23 +1381,23 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
       <!-- Detect section (new mode only) -->
       <div id="import-detect-section">
         <div class="settings-field">
-          <label class="settings-label">Chemin du dossier</label>
+          <label class="settings-label" data-i18n="import.path.label">Folder path</label>
           <div class="import-detect-row">
             <input class="settings-input" id="import-path-input" type="text"
-              placeholder="~/dev/mon-projet ou chemin absolu" spellcheck="false"
+              placeholder="~/dev/my-project or absolute path" data-i18n-placeholder="import.path.placeholder" spellcheck="false"
               onkeydown="if(event.key==='Enter')detectImportProject()"/>
-            <button class="btn-pick-folder" onclick="pickFolderInto('import-path-input')" title="Parcourir…">
+            <button class="btn-pick-folder" onclick="pickFolderInto('import-path-input')" title="Browse…" data-i18n-title="import.path.browse">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
-            <button class="import-detect-btn" id="import-detect-btn" onclick="detectImportProject()">Détecter</button>
+            <button class="import-detect-btn" id="import-detect-btn" onclick="detectImportProject()" data-i18n="import.detect">Detect</button>
           </div>
-          <span class="settings-hint">Le scan va remplir automatiquement les propriétés du projet.</span>
+          <span class="settings-hint" data-i18n="import.scanHint">The scan will automatically fill in the project properties.</span>
         </div>
       </div>
 
       <!-- Duplicate warning -->
-      <div class="import-dup-warn" id="import-dup-warn">
-        ⚠ Ce projet est déjà dans le registre. Vous pouvez le modifier via le bouton ✎ sur la ligne du projet.
+      <div class="import-dup-warn" id="import-dup-warn" data-i18n="import.alreadyImported">
+        ⚠ This project is already in the registry. You can edit it via the ✎ button on the project row.
       </div>
 
       <!-- Form (filled after detect or in edit mode) -->
@@ -1405,67 +1405,67 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 
         <!-- Path display (edit mode) -->
         <div id="import-path-display-wrap" style="display:none" class="settings-field">
-          <label class="settings-label">Chemin</label>
+          <label class="settings-label" data-i18n="import.path.editLabel">Path</label>
           <div class="import-path-display" id="import-path-display"></div>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Nom du projet <span style="color:var(--rd)">*</span></label>
-          <input class="settings-input" id="import-name" type="text" placeholder="Nom affiché dans la liste"/>
+          <label class="settings-label"><span data-i18n="import.name.label">Project name</span> <span style="color:var(--rd)">*</span></label>
+          <input class="settings-input" id="import-name" type="text" placeholder="Name shown in the list" data-i18n-placeholder="import.name.placeholder"/>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Description</label>
-          <input class="settings-input" id="import-description" type="text" placeholder="Description courte (optionnelle)"/>
+          <label class="settings-label" data-i18n="import.description.label">Description</label>
+          <input class="settings-input" id="import-description" type="text" placeholder="Short description (optional)" data-i18n-placeholder="import.description.placeholder"/>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Composants <span class="settings-hint" style="display:inline">technologies et outils utilisés</span></label>
+          <label class="settings-label"><span data-i18n="import.components.label">Components</span> <span class="settings-hint" style="display:inline" data-i18n="import.components.hint">technologies and tools used</span></label>
           <div class="comp-picker" id="import-comp-picker">
             <div class="comp-active-list" id="import-comp-active">
-              <span class="comp-active-empty">Aucun composant sélectionné</span>
+              <span class="comp-active-empty" data-i18n="import.components.empty">No component selected</span>
             </div>
             <div class="comp-preset-wrap">
-              <span class="comp-preset-label">Ajouter :</span>
+              <span class="comp-preset-label" data-i18n="import.components.addPreset">Add:</span>
               <div class="comp-preset-list" id="import-comp-presets"></div>
             </div>
             <div class="comp-custom-row">
-              <input class="comp-custom-input" id="import-comp-custom" type="text" placeholder="Autre composant…"
+              <input class="comp-custom-input" id="import-comp-custom" type="text" placeholder="Other component…" data-i18n-placeholder="import.components.customPlaceholder"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomComponent()}"/>
-              <button class="comp-custom-add" onclick="addCustomComponent()">+ Ajouter</button>
+              <button class="comp-custom-add" onclick="addCustomComponent()" data-i18n="import.components.addCustom">+ Add</button>
             </div>
           </div>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Type de projet</label>
+          <label class="settings-label" data-i18n="import.type.label">Project type</label>
           <div class="type-selector-grid" id="import-type-grid"></div>
           <div class="type-incompatible-msg" id="import-type-warn"></div>
-          <span class="settings-hint">● = type auto-détecté · Les types grisés sont inhabituels pour ce stack.</span>
+          <span class="settings-hint" data-i18n="import.type.hint">● = auto-detected type · Greyed-out types are unusual for this stack.</span>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Catégories fonctionnelles</label>
+          <label class="settings-label" data-i18n="import.cats.label">Functional categories</label>
           <div class="import-cat-section">
             <div class="import-cat-list" id="import-cat-list"></div>
-            <span class="settings-hint">Assignez des catégories pour organiser vos projets.</span>
+            <span class="settings-hint" data-i18n="import.cats.hint">Assign categories to organize your projects.</span>
           </div>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Couleur</label>
+          <label class="settings-label" data-i18n="import.color.label">Color</label>
           <div class="import-color-row" id="import-color-row"></div>
         </div>
 
         <div class="settings-section">
           <div class="settings-section-title" style="display:flex;align-items:center;justify-content:space-between">
-            Commandes de lancement
+            <span data-i18n="import.commands.section">Launch commands</span>
             <button class="btn-add-cmd" onclick="addImportCommand()">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Ajouter
+              <span data-i18n="import.commands.add">Add</span>
             </button>
           </div>
-          <div class="settings-hint" style="margin-bottom:6px">Clé · Label · Commande · Port (optionnel)</div>
+          <div class="settings-hint" style="margin-bottom:6px" data-i18n="import.commands.header">Key · Label · Command · Port (optional)</div>
           <div class="cmd-editor" id="import-cmd-editor"></div>
         </div>
 
@@ -1473,8 +1473,8 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
     </div>
     <div class="import-footer">
       <div class="import-msg" id="import-msg"></div>
-      <button class="import-cancel" onclick="closeImportPanel()">Annuler</button>
-      <button class="import-submit" id="import-submit" onclick="saveImport()">Importer</button>
+      <button class="import-cancel" onclick="closeImportPanel()" data-i18n="import.cancel">Cancel</button>
+      <button class="import-submit" id="import-submit" onclick="saveImport()" data-i18n="import.save">Import</button>
     </div>
   </div>
 </div>
