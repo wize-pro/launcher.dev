@@ -180,5 +180,16 @@
   "date.monthsAgo": "il y a {mo} mois",
   "date.yearsAgo": "il y a {y} an{yearPlural}",
   "editor.cantOpen": "Impossible d'ouvrir {name} : {error}\n\nVérifie que la commande \"{cmd}\" est disponible dans ton PATH.",
-  "main.loading": "Chargement…"
+  "main.loading": "Chargement…",
+  "scan.log.devRootNotFound": "devRoot introuvable : {root}",
+  "scan.log.root": "Racine : {root}   (profondeur max : {depth})",
+  "scan.log.cannotRead": "Impossible de lire {dir} : {msg}",
+  "scan.log.nameMissing": "{file} : champ \"name\" manquant",
+  "scan.log.parseError": "Erreur parsing {file} : {msg}",
+  "scan.log.folderNote": "(dossier: {name})",
+  "scan.log.subfoldersOne": "{dir}   ({count} sous-dossier)",
+  "scan.log.subfoldersMany": "{dir}   ({count} sous-dossiers)",
+  "scan.log.doneOne": "{count} projet trouvé",
+  "scan.log.doneMany": "{count} projets trouvés",
+  "scan.log.unexpectedError": "Erreur : {msg}"
 }

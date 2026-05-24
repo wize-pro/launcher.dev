@@ -574,11 +574,11 @@ function scanProjects(push) {
   const emit = typeof push === 'function' ? push : () => {};
 
   if (!fs.existsSync(settings.devRoot)) {
-    emit('warn', `devRoot introuvable : ${settings.devRoot}`);
+    emit('warn', t('scan.log.devRootNotFound', undefined, { root: settings.devRoot }));
     return projects;
   }
 
-  emit('info', `Racine : ${settings.devRoot}   (profondeur max : ${settings.scanDepth})`);
+  emit('info', t('scan.log.root', undefined, { root: settings.devRoot, depth: settings.scanDepth }));
 
   function walk(dir, depth) {
     if (depth > settings.scanDepth) return;
@@ -587,7 +587,7 @@ function scanProjects(push) {
     try {
       entries = fs.readdirSync(dir, { withFileTypes: true });
     } catch (e) {
-      emit('warn', `Impossible de lire ${path.relative(settings.devRoot, dir)} : ${e.message}`);
+      emit('warn', t('scan.log.cannotRead', undefined, { dir: path.relative(settings.devRoot, dir), msg: e.message }));
       return;
     }
 
@@ -607,16 +607,16 @@ function scanProjects(push) {
           projects.push({ id, name: data.name, description: data.description || '', components: launchComps, color: data.color || null, commands: data.commands || {}, path: dir, source: 'launcher.yml' });
           return;
         }
-        emit('warn', `${relDir}/.launcher.yml : champ "name" manquant`);
+        emit('warn', t('scan.log.nameMissing', undefined, { file: `${relDir}/.launcher.yml` }));
       } catch (e) {
-        emit('warn', `Erreur parsing ${relDir}/.launcher.yml : ${e.message}`);
+        emit('warn', t('scan.log.parseError', undefined, { file: `${relDir}/.launcher.yml`, msg: e.message }));
       }
     }
 
     // ── 2. Auto-détection directe ─────────────────────────────────────────────
     const detected = detectProject(dir, entries);
     if (detected) {
-      const nameNote = displayName !== folderName ? ` (dossier: ${folderName})` : '';
+      const nameNote = displayName !== folderName ? ` ${t('scan.log.folderNote', undefined, { name: folderName })}` : '';
       emit('found', `${displayName}   [${detected.components.join(', ')}]   auto   ${relDir}${nameNote}`);
       projects.push({ id, name: displayName, description: '', components: detected.components, color: detected.color || null, commands: detected.commands, path: dir, source: 'auto' });
       return;
@@ -689,7 +689,8 @@ function scanProjects(push) {
 
     // ── 4. Descendre normalement ──────────────────────────────────────────────
     if (subdirs.length > 0) {
-      emit('explore', `${relDir}   (${subdirs.length} sous-dossier${subdirs.length > 1 ? 's' : ''})`);
+      const subfolderKey = subdirs.length > 1 ? 'scan.log.subfoldersMany' : 'scan.log.subfoldersOne';
+      emit('explore', t(subfolderKey, undefined, { dir: relDir, count: subdirs.length }));
     }
     for (const entry of subdirs) {
       walk(path.join(dir, entry.name), depth + 1);
@@ -697,7 +698,8 @@ function scanProjects(push) {
   }
 
   walk(settings.devRoot, 1);
-  emit('done', `${projects.length} projet${projects.length !== 1 ? 's' : ''} trouvé${projects.length !== 1 ? 's' : ''}`);
+  const doneKey = projects.length === 1 ? 'scan.log.doneOne' : 'scan.log.doneMany';
+  emit('done', t(doneKey, undefined, { count: projects.length }));
   return projects;
 }
 
@@ -863,7 +865,7 @@ app.get('/api/scan-stream', (req, res) => {
     }));
     res.write(`event: projects\ndata: ${JSON.stringify(marked)}\n\n`);
   } catch (e) {
-    send('warn', `Erreur : ${e.message}`);
+    send('warn', t('scan.log.unexpectedError', undefined, { msg: e.message }));
   }
 
   res.end();

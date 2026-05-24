@@ -180,5 +180,16 @@
   "date.monthsAgo": "{mo} mo. ago",
   "date.yearsAgo": "{y} yr{yearPlural} ago",
   "editor.cantOpen": "Cannot open {name}: {error}\n\nCheck that the \"{cmd}\" command is available in your PATH.",
-  "main.loading": "Loading…"
+  "main.loading": "Loading…",
+  "scan.log.devRootNotFound": "devRoot not found: {root}",
+  "scan.log.root": "Root: {root}   (max depth: {depth})",
+  "scan.log.cannotRead": "Cannot read {dir}: {msg}",
+  "scan.log.nameMissing": "{file}: missing \"name\" field",
+  "scan.log.parseError": "Parse error {file}: {msg}",
+  "scan.log.folderNote": "(folder: {name})",
+  "scan.log.subfoldersOne": "{dir}   ({count} subfolder)",
+  "scan.log.subfoldersMany": "{dir}   ({count} subfolders)",
+  "scan.log.doneOne": "{count} project found",
+  "scan.log.doneMany": "{count} projects found",
+  "scan.log.unexpectedError": "Error: {msg}"
 }
