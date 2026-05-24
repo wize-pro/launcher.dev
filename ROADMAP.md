@@ -13,10 +13,13 @@ Live board: <https://github.com/users/wize-pro/projects/1>
 - [ ] #2 Cross-platform tray icon (light/colored variant for Windows & Linux) — _enhancement_
 - [ ] #4 Add a screenshot to the README — _documentation_
 - [ ] #5 Add more UI languages (es, de, …) — _enhancement_
-- [ ] #7 Add CHANGELOG.md and per-milestone release notes — _documentation_
+- [x] #7 Add CHANGELOG.md and per-milestone release notes — _documentation_
 
 ## v1.0.0 — Stabilization
 
 - [ ] #3 Code signing for macOS & Windows distributables — _enhancement, build_
 - [ ] #6 Broaden automated test coverage — _enhancement_
 
+## Unscheduled / backlog
+
+- [ ] #9 Fill the wiki on GitHub — _documentation_
