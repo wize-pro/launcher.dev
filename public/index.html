@@ -58,7 +58,7 @@ html[data-theme="light"] .cat-popover,
 html[data-theme="light"] .cat-color-picker{box-shadow:0 4px 16px rgba(0,0,0,.12)}
 html[data-theme="light"] .has-running .sdot{box-shadow:0 0 5px rgba(22,163,74,.5)}
 
-/* Icônes thème — montrer lune en dark, soleil en light */
+/* Theme icons — show moon in dark mode, sun in light mode */
 .theme-icon-moon{display:block}
 .theme-icon-sun{display:none}
 html[data-theme="light"] .theme-icon-moon{display:none}
@@ -283,7 +283,7 @@ header{
   flex-shrink:0;overflow-x:auto;
 }
 .filter-bar::-webkit-scrollbar{height:0}
-/* Les boutons dans #tag-pills doivent être des flex-items directs */
+/* Buttons inside #tag-pills must be direct flex items */
 #tag-pills{display:contents}
 
 .fp{
@@ -350,9 +350,9 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
   display:grid;
   grid-template-columns:
     32px               /* col-icon : sdot + type */
-    minmax(0,210px)    /* col-name : nom + git + badge */
-    minmax(0,1fr)      /* col-path : chemin */
-    82px               /* col-date : date activité */
+    minmax(0,210px)    /* col-name : name + git + badge */
+    minmax(0,1fr)      /* col-path : path */
+    82px               /* col-date : activity date */
     auto;              /* col-actions : boutons */
   align-items:center;
   column-gap:10px;
@@ -360,11 +360,11 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
   cursor:default;
 }
 
-/* Ligne 2 : éléments variables (tags, catégories) */
+/* Row 2: variable elements (tags, categories) */
 .prow-meta{
   display:flex;align-items:center;gap:5px;
   flex-wrap:wrap;
-  /* aligne sous col-name : padding-main(16) + col-icon(32) + gap(10) = 58px */
+  /* align under col-name: padding-main(16) + col-icon(32) + gap(10) = 58px */
   padding:2px 12px 8px 58px;
 }
 
@@ -474,7 +474,7 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
 .cbtn.folder-btn:hover{color:#fbbf24;background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2)}
 .cbtn.vscode-btn:hover{color:#4fc3f7;background:rgba(79,195,247,.08);border-color:rgba(79,195,247,.2)}
 
-/* Bouton éditeur dynamique */
+/* Dynamic editor button */
 .editor-btn-wrap{display:inline-flex;opacity:0;transition:opacity .15s}
 .prow:hover .editor-btn-wrap{opacity:1}
 .cbtn.editor-btn{gap:5px;border-radius:5px 0 0 5px;border-right:none}
@@ -482,7 +482,7 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
 .cbtn.editor-chevron{padding:4px 6px;border-radius:0 5px 5px 0;color:var(--t3);font-size:10px}
 .cbtn.editor-chevron:hover{color:var(--tx);background:var(--s3)}
 
-/* Popover sélecteur IDE */
+/* IDE selector popover */
 .ide-picker{
   position:fixed;z-index:400;
   background:var(--s2);border:1px solid var(--bd2);
@@ -698,13 +698,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 .sort-btn:hover{background:var(--s3);color:var(--tx);border-color:var(--bd)}
 .sort-btn.active{color:var(--tx);font-weight:600}
 .sort-arrow{font-size:10px}
-/* col-date : activité */
+/* col-date: activity */
 .col-date{
   font-size:10px;color:var(--t3);font-family:var(--mono);
   white-space:nowrap;text-align:right;
 }
 .col-date.recent{color:var(--gn);opacity:.8}
-/* catégories (dans prow-meta) */
+/* categories (inside prow-meta) */
 .col-cats{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 /* Port link */
 .port-wrap{display:inline-flex;align-items:center;gap:3px}
@@ -1211,7 +1211,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 .system{color:var(--t3);font-style:italic}
 </style>
 <script>
-  /* Applique le thème sauvegardé avant le premier rendu pour éviter le flash */
+  /* Apply saved theme before first render to avoid flash */
   if(localStorage.getItem('dlTheme')==='light')
     document.documentElement.setAttribute('data-theme','light');
 </script>
@@ -1227,24 +1227,24 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
-    <input id="search" type="text" placeholder="Rechercher un projet…" oninput="renderProjects()"/>
+    <input id="search" type="text" placeholder="Search a project…" data-i18n-placeholder="header.search.placeholder" oninput="renderProjects()"/>
     <span class="search-kbd">R</span>
   </div>
 
   <div class="header-right">
-    <span class="running-badge" id="running-badge">en cours</span>
+    <span class="running-badge" id="running-badge" data-i18n="header.running">running</span>
     <button class="btn-scan" id="btn-add" onclick="openImportPanel({mode:'new'})"
       style="background:var(--s2);border:1px solid var(--bd);color:var(--t2);margin-right:2px;font-weight:500"
       onmouseover="this.style.background='var(--s3)';this.style.color='var(--tx)'"
       onmouseout="this.style.background='var(--s2)';this.style.color='var(--t2)'"
-      title="Ajouter un projet manuellement">
+      title="Add a project manually" data-i18n-title="header.add.title">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Ajouter
+      <span data-i18n="header.add.label">Add</span>
     </button>
     <button class="btn-scan" id="btn-scan" onclick="startScan()">
       <span class="icon">⟳</span> Scan
     </button>
-    <button class="btn-settings" id="btn-theme" onclick="toggleTheme()" title="Changer de thème">
+    <button class="btn-settings" id="btn-theme" onclick="toggleTheme()" title="Change theme" data-i18n-title="header.theme.title">
       <!-- Lune : visible en mode dark -->
       <svg class="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -1258,7 +1258,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
       </svg>
     </button>
-    <button class="btn-settings" id="btn-settings" onclick="openSettings()" title="Paramètres (⌘,)">
+    <button class="btn-settings" id="btn-settings" onclick="openSettings()" title="Settings (⌘,)" data-i18n-title="header.settings.title">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
@@ -1271,46 +1271,46 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
   <div class="settings-panel" id="settings-panel">
     <div class="settings-header">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ac)"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="settings-title">Paramètres</span>
+      <span class="settings-title" data-i18n="settings.title">Settings</span>
       <button class="settings-close" onclick="closeSettings()">✕</button>
     </div>
     <div class="settings-body">
 
       <div class="settings-section">
-        <div class="settings-section-title">Scan des projets</div>
+        <div class="settings-section-title" data-i18n="settings.scan.section">Project scan</div>
 
         <div class="settings-field">
-          <label class="settings-label">Dossier racine des projets</label>
+          <label class="settings-label" data-i18n="settings.devRoot.label">Projects root folder</label>
           <div class="settings-input-row">
-            <input class="settings-input" id="cfg-devRoot" type="text" placeholder="~/dev" spellcheck="false"/>
-            <button class="btn-pick-folder" onclick="pickFolderInto('cfg-devRoot')" title="Parcourir…">
+            <input class="settings-input" id="cfg-devRoot" type="text" placeholder="~/dev" data-i18n-placeholder="settings.devRoot.placeholder" spellcheck="false"/>
+            <button class="btn-pick-folder" onclick="pickFolderInto('cfg-devRoot')" title="Browse…" data-i18n-title="settings.devRoot.browse">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
           </div>
-          <span class="settings-hint">Chemin absolu ou avec ~. Tous les projets seront cherchés à l'intérieur de ce dossier.</span>
+          <span class="settings-hint" data-i18n="settings.devRoot.hint">Absolute path or with ~. All projects will be searched inside this folder.</span>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Profondeur de scan</label>
+          <label class="settings-label" data-i18n="settings.scanDepth.label">Scan depth</label>
           <input class="settings-input" id="cfg-scanDepth" type="number" min="1" max="10" style="width:80px"/>
-          <span class="settings-hint">Nombre de niveaux de sous-dossiers à explorer (1–10). Plus élevé = scan plus lent.</span>
+          <span class="settings-hint" data-i18n="settings.scanDepth.hint">Number of subfolder levels to explore (1–10). Higher = slower scan.</span>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Dossiers ignorés</label>
+          <label class="settings-label" data-i18n="settings.ignoreDirs.label">Ignored folders</label>
           <input class="settings-input" id="cfg-ignoreDirs" type="text" placeholder="node_modules, .git, dist…" spellcheck="false"/>
-          <span class="settings-hint">Séparés par des virgules. Ces dossiers sont ignorés lors du scan.</span>
+          <span class="settings-hint" data-i18n="settings.ignoreDirs.hint">Comma-separated. These folders are ignored during scan.</span>
         </div>
       </div>
 
       <!-- IDE management -->
       <div class="settings-section" id="settings-ides-section">
-        <div class="settings-section-title">Éditeurs de code</div>
+        <div class="settings-section-title" data-i18n="settings.ides.section">Code editors</div>
         <div id="settings-ide-list" style="display:flex;flex-direction:column;gap:5px"></div>
 
         <div style="display:flex;gap:6px;margin-top:4px;align-items:center">
           <select class="settings-input" id="ide-preset-select" style="flex:1" onchange="onIdePresetChange()">
-            <option value="">Ajouter un éditeur…</option>
+            <option value="" data-i18n="settings.ide.addPreset">Add an editor…</option>
             <option value="vscode">VS Code</option>
             <option value="cursor">Cursor</option>
             <option value="windsurf">Windsurf</option>
@@ -1320,30 +1320,36 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
             <option value="idea">IntelliJ IDEA</option>
             <option value="pycharm">PyCharm</option>
             <option value="sublime">Sublime Text</option>
-            <option value="custom">Personnalisé…</option>
+            <option value="custom" data-i18n="settings.ide.custom">Custom…</option>
           </select>
-          <button class="settings-browse" onclick="addIdeFromPreset()">Ajouter</button>
+          <button class="settings-browse" onclick="addIdeFromPreset()" data-i18n="settings.ide.add">Add</button>
         </div>
 
         <div id="ide-custom-row" style="display:none;gap:6px;margin-top:4px;flex-direction:column">
-          <input class="settings-input" id="ide-custom-name" placeholder="Nom (ex: Neovim)" spellcheck="false"/>
-          <input class="settings-input" id="ide-custom-cmd"  placeholder="Commande (ex: nvim)" spellcheck="false" style="font-family:var(--mono)"/>
+          <input class="settings-input" id="ide-custom-name" placeholder="Name (e.g. Neovim)" data-i18n-placeholder="settings.ide.custom.name" spellcheck="false"/>
+          <input class="settings-input" id="ide-custom-cmd"  placeholder="Command (e.g. nvim)" data-i18n-placeholder="settings.ide.custom.cmd" spellcheck="false" style="font-family:var(--mono)"/>
         </div>
       </div>
 
       <!-- Categories management -->
       <div class="settings-section" id="settings-cats-section">
-        <div class="settings-section-title">Catégories fonctionnelles</div>
+        <div class="settings-section-title" data-i18n="settings.cats.section">Functional categories</div>
         <div id="settings-cat-list" style="display:flex;flex-direction:column;gap:6px"></div>
         <div style="display:flex;gap:8px;margin-top:4px">
-          <input class="settings-input" id="new-cat-name" type="text" placeholder="Nom de la catégorie…" style="flex:1" onkeydown="if(event.key==='Enter')addCategoryFromSettings()"/>
-          <button class="settings-browse" onclick="addCategoryFromSettings()">+ Ajouter</button>
+          <input class="settings-input" id="new-cat-name" type="text" placeholder="Category name…" data-i18n-placeholder="settings.cats.placeholder" style="flex:1" onkeydown="if(event.key==='Enter')addCategoryFromSettings()"/>
+          <button class="settings-browse" onclick="addCategoryFromSettings()" data-i18n="settings.cats.add">+ Add</button>
         </div>
+      </div>
+
+      <!-- Language -->
+      <div class="settings-section">
+        <div class="settings-section-title" data-i18n="settings.language.label">Language</div>
+        <select class="settings-input" id="cfg-lang" onchange="setLang(this.value)"></select>
       </div>
 
       <!-- About -->
       <div class="settings-section">
-        <div class="settings-section-title">À propos</div>
+        <div class="settings-section-title" data-i18n="settings.about">About</div>
         <div class="settings-hint" id="about-version">Dev Launcher</div>
       </div>
 
@@ -1352,8 +1358,8 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
       <div style="flex:1;display:flex;flex-direction:column;gap:6px">
         <div class="settings-msg" id="settings-msg"></div>
         <div style="display:flex;gap:8px">
-          <button class="settings-cancel" onclick="closeSettings()">Annuler</button>
-          <button class="settings-save" id="settings-save" onclick="saveSettings()">Enregistrer et rescanner</button>
+          <button class="settings-cancel" onclick="closeSettings()" data-i18n="settings.cancel">Cancel</button>
+          <button class="settings-save" id="settings-save" onclick="saveSettings()" data-i18n="settings.save">Save and rescan</button>
         </div>
       </div>
     </div>
@@ -1367,7 +1373,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ac)">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
-      <span class="import-title" id="import-title">Importer un projet</span>
+      <span class="import-title" id="import-title" data-i18n="import.title">Import a project</span>
       <button class="settings-close" onclick="closeImportPanel()">✕</button>
     </div>
     <div class="import-body" id="import-body">
@@ -1375,23 +1381,23 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
       <!-- Detect section (new mode only) -->
       <div id="import-detect-section">
         <div class="settings-field">
-          <label class="settings-label">Chemin du dossier</label>
+          <label class="settings-label" data-i18n="import.path.label">Folder path</label>
           <div class="import-detect-row">
             <input class="settings-input" id="import-path-input" type="text"
-              placeholder="~/dev/mon-projet ou chemin absolu" spellcheck="false"
+              placeholder="~/dev/my-project or absolute path" data-i18n-placeholder="import.path.placeholder" spellcheck="false"
               onkeydown="if(event.key==='Enter')detectImportProject()"/>
-            <button class="btn-pick-folder" onclick="pickFolderInto('import-path-input')" title="Parcourir…">
+            <button class="btn-pick-folder" onclick="pickFolderInto('import-path-input')" title="Browse…" data-i18n-title="import.path.browse">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
-            <button class="import-detect-btn" id="import-detect-btn" onclick="detectImportProject()">Détecter</button>
+            <button class="import-detect-btn" id="import-detect-btn" onclick="detectImportProject()" data-i18n="import.detect">Detect</button>
           </div>
-          <span class="settings-hint">Le scan va remplir automatiquement les propriétés du projet.</span>
+          <span class="settings-hint" data-i18n="import.scanHint">The scan will automatically fill in the project properties.</span>
         </div>
       </div>
 
       <!-- Duplicate warning -->
-      <div class="import-dup-warn" id="import-dup-warn">
-        ⚠ Ce projet est déjà dans le registre. Vous pouvez le modifier via le bouton ✎ sur la ligne du projet.
+      <div class="import-dup-warn" id="import-dup-warn" data-i18n="import.alreadyImported">
+        ⚠ This project is already in the registry. You can edit it via the ✎ button on the project row.
       </div>
 
       <!-- Form (filled after detect or in edit mode) -->
@@ -1399,67 +1405,67 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 
         <!-- Path display (edit mode) -->
         <div id="import-path-display-wrap" style="display:none" class="settings-field">
-          <label class="settings-label">Chemin</label>
+          <label class="settings-label" data-i18n="import.path.editLabel">Path</label>
           <div class="import-path-display" id="import-path-display"></div>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Nom du projet <span style="color:var(--rd)">*</span></label>
-          <input class="settings-input" id="import-name" type="text" placeholder="Nom affiché dans la liste"/>
+          <label class="settings-label"><span data-i18n="import.name.label">Project name</span> <span style="color:var(--rd)">*</span></label>
+          <input class="settings-input" id="import-name" type="text" placeholder="Name shown in the list" data-i18n-placeholder="import.name.placeholder"/>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Description</label>
-          <input class="settings-input" id="import-description" type="text" placeholder="Description courte (optionnelle)"/>
+          <label class="settings-label" data-i18n="import.description.label">Description</label>
+          <input class="settings-input" id="import-description" type="text" placeholder="Short description (optional)" data-i18n-placeholder="import.description.placeholder"/>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Composants <span class="settings-hint" style="display:inline">technologies et outils utilisés</span></label>
+          <label class="settings-label"><span data-i18n="import.components.label">Components</span> <span class="settings-hint" style="display:inline" data-i18n="import.components.hint">technologies and tools used</span></label>
           <div class="comp-picker" id="import-comp-picker">
             <div class="comp-active-list" id="import-comp-active">
-              <span class="comp-active-empty">Aucun composant sélectionné</span>
+              <span class="comp-active-empty" data-i18n="import.components.empty">No component selected</span>
             </div>
             <div class="comp-preset-wrap">
-              <span class="comp-preset-label">Ajouter :</span>
+              <span class="comp-preset-label" data-i18n="import.components.addPreset">Add:</span>
               <div class="comp-preset-list" id="import-comp-presets"></div>
             </div>
             <div class="comp-custom-row">
-              <input class="comp-custom-input" id="import-comp-custom" type="text" placeholder="Autre composant…"
+              <input class="comp-custom-input" id="import-comp-custom" type="text" placeholder="Other component…" data-i18n-placeholder="import.components.customPlaceholder"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomComponent()}"/>
-              <button class="comp-custom-add" onclick="addCustomComponent()">+ Ajouter</button>
+              <button class="comp-custom-add" onclick="addCustomComponent()" data-i18n="import.components.addCustom">+ Add</button>
             </div>
           </div>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Type de projet</label>
+          <label class="settings-label" data-i18n="import.type.label">Project type</label>
           <div class="type-selector-grid" id="import-type-grid"></div>
           <div class="type-incompatible-msg" id="import-type-warn"></div>
-          <span class="settings-hint">● = type auto-détecté · Les types grisés sont inhabituels pour ce stack.</span>
+          <span class="settings-hint" data-i18n="import.type.hint">● = auto-detected type · Greyed-out types are unusual for this stack.</span>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Catégories fonctionnelles</label>
+          <label class="settings-label" data-i18n="import.cats.label">Functional categories</label>
           <div class="import-cat-section">
             <div class="import-cat-list" id="import-cat-list"></div>
-            <span class="settings-hint">Assignez des catégories pour organiser vos projets.</span>
+            <span class="settings-hint" data-i18n="import.cats.hint">Assign categories to organize your projects.</span>
           </div>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Couleur</label>
+          <label class="settings-label" data-i18n="import.color.label">Color</label>
           <div class="import-color-row" id="import-color-row"></div>
         </div>
 
         <div class="settings-section">
           <div class="settings-section-title" style="display:flex;align-items:center;justify-content:space-between">
-            Commandes de lancement
+            <span data-i18n="import.commands.section">Launch commands</span>
             <button class="btn-add-cmd" onclick="addImportCommand()">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Ajouter
+              <span data-i18n="import.commands.add">Add</span>
             </button>
           </div>
-          <div class="settings-hint" style="margin-bottom:6px">Clé · Label · Commande · Port (optionnel)</div>
+          <div class="settings-hint" style="margin-bottom:6px" data-i18n="import.commands.header">Key · Label · Command · Port (optional)</div>
           <div class="cmd-editor" id="import-cmd-editor"></div>
         </div>
 
@@ -1467,8 +1473,8 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
     </div>
     <div class="import-footer">
       <div class="import-msg" id="import-msg"></div>
-      <button class="import-cancel" onclick="closeImportPanel()">Annuler</button>
-      <button class="import-submit" id="import-submit" onclick="saveImport()">Importer</button>
+      <button class="import-cancel" onclick="closeImportPanel()" data-i18n="import.cancel">Cancel</button>
+      <button class="import-submit" id="import-submit" onclick="saveImport()" data-i18n="import.save">Import</button>
     </div>
   </div>
 </div>
@@ -1476,13 +1482,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <!-- ══ FILTER BAR ══ -->
 <div class="filter-bar" id="filter-bar">
   <button class="fp active" data-tag="all" onclick="setFilter('all')">
-    Tous <span class="cnt" id="cnt-all">0</span>
+    <span data-i18n="filter.all">All</span> <span class="cnt" id="cnt-all">0</span>
   </button>
   <button class="fp" data-tag="running" onclick="setFilter('running')">
-    <span style="color:var(--gn)">●</span> En cours <span class="cnt" id="cnt-running">0</span>
+    <span style="color:var(--gn)">●</span> <span data-i18n="filter.running.label">Running</span> <span class="cnt" id="cnt-running">0</span>
   </button>
   <button class="fp" data-tag="favorites" onclick="setFilter('favorites')" id="btn-filter-fav" style="display:none">
-    ★ Favoris <span class="cnt" id="cnt-favorites">0</span>
+    <span data-i18n="filter.favorites.label">★ Favorites</span> <span class="cnt" id="cnt-favorites">0</span>
   </button>
   <div class="fp-sep"></div>
   <div id="tag-pills"></div>
@@ -1492,17 +1498,17 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <div class="type-bar" id="type-bar">
   <span class="type-bar-label">Type</span>
   <div id="type-pills" style="display:contents"></div>
-  <button class="type-bar-clear" id="type-bar-clear" onclick="clearTypeFilters()">✕ Effacer</button>
+  <button class="type-bar-clear" id="type-bar-clear" onclick="clearTypeFilters()" data-i18n="type.bar.clear">✕ Clear</button>
 </div>
 
 <!-- ══ CATEGORY BAR ══ -->
 <div class="cat-bar" id="cat-bar">
-  <span class="cat-bar-label">Catégories</span>
+  <span class="cat-bar-label" data-i18n="cat.bar.label">Categories</span>
   <div id="cat-pills" style="display:contents"></div>
-  <button class="cat-bar-clear" id="cat-bar-clear" onclick="clearCatFilters()">✕ Effacer</button>
+  <button class="cat-bar-clear" id="cat-bar-clear" onclick="clearCatFilters()" data-i18n="cat.clear">✕ Clear</button>
   <button class="cat-bar-manage" onclick="openSettings();setTimeout(()=>document.getElementById('settings-cats-section')?.scrollIntoView({behavior:'smooth'}),300)">
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Gérer
+    <span data-i18n="cat.manage">Manage</span>
   </button>
 </div>
 
@@ -1513,13 +1519,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <!-- ══ LIST META BAR ══ -->
 <div class="list-meta">
   <span class="list-meta-count" id="list-meta-count"></span>
-  <span class="sort-label">Trier par</span>
+  <span class="sort-label" data-i18n="sort.label">Sort by</span>
   <div class="sort-bar">
     <button class="sort-btn" id="sort-name" onclick="setSort('name')">
-      Nom <span class="sort-arrow" id="sort-name-arrow">↑</span>
+      <span data-i18n="sort.name">Name</span> <span class="sort-arrow" id="sort-name-arrow">↑</span>
     </button>
     <button class="sort-btn active" id="sort-recent" onclick="setSort('recent')">
-      Récent <span class="sort-arrow" id="sort-recent-arrow">↓</span>
+      <span data-i18n="sort.recent">Recent</span> <span class="sort-arrow" id="sort-recent-arrow">↓</span>
     </button>
   </div>
 </div>
@@ -1529,7 +1535,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
   <div class="scan-panel">
     <div class="so-header">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ac)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <div class="so-text" id="so-text">Scan en cours…</div>
+      <div class="so-text" id="so-text" data-i18n="scan.inProgress">Scanning…</div>
       <div class="so-spinner" id="so-spinner"></div>
       <button class="so-close" onclick="closeScan()">✕</button>
     </div>
@@ -1537,7 +1543,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
     <div class="so-results" id="so-results"></div>
     <div class="so-footer" id="so-footer" style="display:none">
       <span id="so-footer-text"></span>
-      <button class="so-import-all" id="so-import-all" onclick="importAllFromScan()">⊕ Importer les nouveaux</button>
+      <button class="so-import-all" id="so-import-all" onclick="importAllFromScan()" data-i18n="scan.importAll">⊕ Import new</button>
     </div>
   </div>
 </div>
@@ -1545,13 +1551,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <!-- ══ PORT FILTER BANNER ══ -->
 <div class="port-filter-bar" id="port-filter-bar">
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-  <span id="port-filter-label">Filtrage par port</span>
-  <button class="port-filter-clear" onclick="clearPortFilter()">✕ Effacer le filtre</button>
+  <span id="port-filter-label"></span>
+  <button class="port-filter-clear" onclick="clearPortFilter()" data-i18n="cat.clear">✕ Clear</button>
 </div>
 
 <!-- ══ MAIN ══ -->
 <main id="main">
-  <div class="empty"><div class="empty-icon">⏳</div>Chargement…</div>
+  <div class="empty"><div class="empty-icon">⏳</div><span data-i18n="main.loading">Loading…</span></div>
 </main>
 
 <!-- ══ TERMINAL ══ -->
@@ -1560,16 +1566,85 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
     <span class="term-label">Terminal</span>
     <div class="term-tabs-wrap" id="term-tabs" onclick="e=>e.stopPropagation()"></div>
     <div class="term-actions" onclick="event.stopPropagation()">
-      <button class="term-btn" onclick="clearTerminal()">Vider</button>
+      <button class="term-btn" onclick="clearTerminal()" data-i18n="terminal.clear">Clear</button>
     </div>
     <span class="term-toggle" id="term-toggle">▼</span>
   </div>
   <div class="term-body" id="term-body">
-    <div class="term-empty">Lancez un projet pour voir les logs ici.</div>
+    <div class="term-empty" data-i18n="terminal.empty">Start a project to see logs here.</div>
   </div>
 </div>
 
+<script src="/i18n.js"></script>
 <script>
+// ── i18n ─────────────────────────────────────────────────────────────────────
+let LANG = localStorage.getItem('dlLang') || 'en';
+const CATALOGS = {};
+
+function t(key, params) { return I18n.translate(CATALOGS, LANG, key, params); }
+
+async function loadCatalog(lang) {
+  if (CATALOGS[lang]) return;
+  CATALOGS[lang] = await fetch(`/locales/${lang}.json`).then(r => r.json()).catch(() => ({}));
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.getAttribute('data-i18n-title'));
+  });
+}
+
+async function initI18n() {
+  const locales = await fetch('/api/locales').then(r => r.json()).catch(() => [{ code: 'en' }]);
+  const supported = locales.map(l => l.code);
+  const settings = await fetch('/api/settings').then(r => r.json()).catch(() => ({}));
+  let lang = settings.lang;
+  if (!lang || !supported.includes(lang)) {
+    lang = I18n.detectLang(navigator.language, supported); // first launch: follow the system
+    fetch('/api/settings', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lang }),
+    }).catch(() => {});
+  }
+  LANG = lang;
+  localStorage.setItem('dlLang', lang);
+  await Promise.all([loadCatalog('en'), loadCatalog(lang)]);
+  applyTranslations();
+}
+
+async function populateLangSelector() {
+  const sel = document.getElementById('cfg-lang');
+  if (!sel) return;
+  const locales = await fetch('/api/locales').then(r => r.json()).catch(() => []);
+  sel.innerHTML = locales.map(l =>
+    `<option value="${l.code}"${l.code === LANG ? ' selected' : ''}>${l.name}</option>`
+  ).join('');
+}
+
+async function setLang(lang) {
+  LANG = lang;
+  localStorage.setItem('dlLang', lang);
+  await loadCatalog(lang);
+  fetch('/api/settings', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lang }),
+  }).catch(() => {});
+  applyTranslations();
+  rerenderDynamic();
+}
+
+// Re-render views that build HTML in JS so a live language switch updates them too.
+function rerenderDynamic() {
+  loadProjects();
+  renderIdeSettings();
+}
+
 // ══ State ══════════════════════════════════════════════════════════════════
 let allProjects = [];
 let activeFilter = 'all';
@@ -1607,7 +1682,7 @@ async function loadFavorites() {
   } catch { favorites = new Set(); }
 }
 
-// ══ Thème ══════════════════════════════════════════════════════════════════
+// ══ Theme ══════════════════════════════════════════════════════════════════
 let currentTheme = localStorage.getItem('dlTheme') || 'dark';
 function applyTheme(theme) {
   currentTheme = theme;
@@ -1727,17 +1802,17 @@ function applySort(list) {
 // ══ Favorites ══════════════════════════════════════════════════════════════
 async function toggleFavorite(id) {
   const wasFav = favorites.has(id);
-  // Mise à jour optimiste immédiate
+  // Immediate optimistic update
   wasFav ? favorites.delete(id) : favorites.add(id);
   renderFilter();
   renderProjects();
-  // Persistance côté serveur (partagée entre web et Electron)
+  // Server-side persistence (shared between web and Electron)
   try {
     await fetch(`/api/favorites/${encodeURIComponent(id)}`, {
       method: wasFav ? 'DELETE' : 'POST',
     });
   } catch {
-    // En cas d'erreur réseau, on annule l'update optimiste
+    // On network error, roll back the optimistic update
     wasFav ? favorites.add(id) : favorites.delete(id);
     renderFilter();
     renderProjects();
@@ -1754,21 +1829,21 @@ function relativeDate(ts) {
   const w  = Math.floor(d / 7);
   const mo = Math.floor(d / 30);
   const y  = Math.floor(d / 365);
-  if (m < 1)   return { label: "à l'instant",  recent: true };
-  if (m < 60)  return { label: `il y a ${m} min`,   recent: true };
-  if (h < 24)  return { label: `il y a ${h}h`,       recent: true };
-  if (d < 2)   return { label: 'hier',                recent: true };
-  if (d < 7)   return { label: `il y a ${d} jours`,  recent: false };
-  if (w < 5)   return { label: `il y a ${w} sem.`,   recent: false };
-  if (mo < 12) return { label: `il y a ${mo} mois`,  recent: false };
-  return       { label: `il y a ${y} an${y>1?'s':''}`, recent: false };
+  if (m < 1)   return { label: t('date.justNow'),                  recent: true };
+  if (m < 60)  return { label: t('date.minutesAgo', { m }),        recent: true };
+  if (h < 24)  return { label: t('date.hoursAgo', { h }),          recent: true };
+  if (d < 2)   return { label: t('date.yesterday'),                 recent: true };
+  if (d < 7)   return { label: t('date.daysAgo', { d }),           recent: false };
+  if (w < 5)   return { label: t('date.weeksAgo', { w }),          recent: false };
+  if (mo < 12) return { label: t('date.monthsAgo', { mo }),        recent: false };
+  return       { label: t('date.yearsAgo', { y, yearPlural: y>1?'s':'' }), recent: false };
 }
 
 function updatePortFilterBanner() {
   const bar   = document.getElementById('port-filter-bar');
   const label = document.getElementById('port-filter-label');
   if (activePortFilter !== null) {
-    label.textContent = `Filtre actif : port ${activePortFilter} — ${portConflicts.get(activePortFilter)?.length || '?'} projets partagent ce port`;
+    label.textContent = t('port.filterActive', { port: activePortFilter, count: portConflicts.get(activePortFilter)?.length || '?' });
     bar.classList.add('visible');
   } else {
     bar.classList.remove('visible');
@@ -1785,7 +1860,7 @@ async function checkPort(port, btn) {
     const { inUse } = await r.json();
     btn.classList.remove('checking');
     dot.className = `port-dot ${inUse ? 'in-use' : 'free'}`;
-    btn.title = inUse ? `Port ${port} occupé` : `Port ${port} libre`;
+    btn.title = inUse ? t('port.inUse', { port }) : t('port.free', { port });
   } catch {
     btn.classList.remove('checking');
     dot.className = 'port-dot';
@@ -1857,6 +1932,13 @@ const PROJECT_TYPES = {
   },
 };
 
+// Translated label for a project type id (falls back to the hardcoded label).
+function typeLabel(id) {
+  const def = PROJECT_TYPES[id] || PROJECT_TYPES.unknown;
+  const translated = t('type.label.' + id);
+  return translated === 'type.label.' + id ? def.label : translated;
+}
+
 // ══ Known components registry ══════════════════════════════════════════════
 const KNOWN_COMPONENTS = {
   node:           { label: 'Node.js',      color: '#f59e0b' },
@@ -1895,7 +1977,7 @@ const COMPONENT_PICKER_ORDER = [
 ];
 
 function detectProjectType(p) {
-  // Priorité 1 : type manuel sauvegardé
+  // Priority 1: manually saved type
   if (p.type) return p.type;
   if (p.typeOverride) return p.typeOverride;
 
@@ -1970,12 +2052,12 @@ function detectProjectType(p) {
   return 'unknown';
 }
 
-// Retourne les types compatibles/recommandés/déconseillés pour un projet
+// Returns compatible/recommended/discouraged types for a project
 function computeCompatibleTypes(p) {
   const comps = new Set(p.components || p.tags || []);
   const autoDetected = detectProjectType({ ...p, type: null, typeOverride: null });
 
-  // Types recommandés selon le stack technique
+  // Recommended types based on the tech stack
   const recommended = new Set([autoDetected]);
 
   if (comps.has('electron') || comps.has('tauri'))               recommended.add('desktop');
@@ -2003,13 +2085,13 @@ function computeCompatibleTypes(p) {
   if (comps.has('make')) {
     recommended.add('script'); recommended.add('cli');
   }
-  // Si aucun composant tech connu → tout est possible
+  // If no known tech component → everything is possible
   const knownTech = ['node','dotnet','python','go','rust','docker','make','electron','tauri','react-native','expo','flutter'];
   if (!knownTech.some(t => comps.has(t))) {
     Object.keys(PROJECT_TYPES).forEach(t => recommended.add(t));
   }
 
-  // Les types non recommandés sont "déconseillés"
+  // Types not in recommended are "discouraged"
   const all = Object.keys(PROJECT_TYPES).filter(t => t !== 'unknown');
   const discouraged = all.filter(t => !recommended.has(t));
 
@@ -2019,7 +2101,7 @@ function computeCompatibleTypes(p) {
 function typeIconHtml(p) {
   const type = detectProjectType(p);
   const def  = PROJECT_TYPES[type] || PROJECT_TYPES.unknown;
-  return `<span class="ptype-icon" title="${def.label}" style="color:${def.color};background:${def.bg}">${def.svg}</span>`;
+  return `<span class="ptype-icon" title="${typeLabel(type)}" style="color:${def.color};background:${def.bg}">${def.svg}</span>`;
 }
 
 // ══ Git icon ═══════════════════════════════════════════════════════════════
@@ -2080,11 +2162,11 @@ function portHtml(port) {
   const isConflict = portConflicts.has(port);
   const conflictCount = isConflict ? portConflicts.get(port).length : 0;
   const conflictBtn = isConflict
-    ? `<button class="port-conflict-btn" title="${conflictCount} projets partagent le port ${port} — cliquer pour filtrer" onclick="event.stopPropagation();filterByPort(${port})">⚠</button>`
+    ? `<button class="port-conflict-btn" title="${t('port.conflictTitle', { count: conflictCount, port })}" onclick="event.stopPropagation();filterByPort(${port})">⚠</button>`
     : '';
   return `<span class="port-wrap">` +
     `<a class="port-link" href="http://localhost:${port}" target="_blank" onclick="event.stopPropagation()">:${port}</a>` +
-    `<button class="port-check-btn" title="Vérifier si le port ${port} est utilisé" onclick="event.stopPropagation();checkPort(${port},this)"><span class="port-dot"></span></button>` +
+    `<button class="port-check-btn" title="${t('port.checkTitle', { port })}" onclick="event.stopPropagation();checkPort(${port},this)"><span class="port-dot"></span></button>` +
     conflictBtn +
     `</span>`;
 }
@@ -2105,7 +2187,7 @@ function renderFilter() {
 
   const badge = document.getElementById('running-badge');
   if (running > 0) {
-    badge.textContent = `${running} en cours`;
+    badge.textContent = t('filter.running', { count: running });
     badge.classList.add('visible');
   } else {
     badge.classList.remove('visible');
@@ -2149,13 +2231,14 @@ function renderTypeBar() {
 
   pills.innerHTML = entries.map(([type, cnt]) => {
     const def = PROJECT_TYPES[type] || PROJECT_TYPES.unknown;
+    const label = typeLabel(type);
     const isActive = activeTypes.has(type);
     return `<button class="tfp ${isActive ? 'active' : ''}"
       style="--type-color:${def.color};--type-bg:${def.bg}"
       onclick="toggleTypeFilter('${type}')"
-      title="${def.label}">
+      title="${label}">
       <span class="tfp-icon" style="color:${isActive ? def.color : 'var(--t3)'}">${def.svg}</span>
-      ${def.label.split('/')[0].trim()}
+      ${label.split('/')[0].trim()}
       <span style="font-size:10px;opacity:.6">${cnt}</span>
     </button>`;
   }).join('');
@@ -2209,12 +2292,16 @@ function renderProjects() {
 
   // Update meta count
   const metaCount = document.getElementById('list-meta-count');
-  if (metaCount) metaCount.innerHTML = `<strong>${list.length}</strong> projet${list.length!==1?'s':''}${list.length < allProjects.length ? ` <span style="color:var(--t3)">sur ${allProjects.length}</span>` : ''}`;
+  if (metaCount) {
+    const word = list.length !== 1 ? t('filter.projects') : t('filter.project');
+    const ofPart = list.length < allProjects.length ? ` <span style="color:var(--t3)">${t('filter.of')} ${allProjects.length}</span>` : '';
+    metaCount.innerHTML = `<strong>${list.length}</strong> ${word}${ofPart}`;
+  }
 
   if (!list.length) {
     const emptyMsg = activeFilter === 'favorites'
-      ? `<div class="empty"><div class="empty-icon">★</div>Aucun projet en favoris.<br><span style="font-size:11px">Cliquez sur l'étoile ★ d'un projet pour l'ajouter.</span></div>`
-      : `<div class="empty"><div class="empty-icon">🔍</div>Aucun projet trouvé</div>`;
+      ? `<div class="empty"><div class="empty-icon">★</div>${t('filter.emptyFavorites')}<br><span style="font-size:11px">${t('filter.emptyFavoritesHint')}</span></div>`
+      : `<div class="empty"><div class="empty-icon">🔍</div>${t('filter.emptySearch')}</div>`;
     main.innerHTML = emptyMsg;
     return;
   }
@@ -2231,16 +2318,16 @@ function renderProjects() {
   let html = '';
 
   if (favList.length) {
-    html += `<div class="section-label">★ Favoris</div>`;
+    html += `<div class="section-label">${t('card.section.favorites')}</div>`;
     html += [...favRunning, ...favIdle].map(p => rowHtml(p)).join('');
   }
   if (nfRunning.length) {
-    if (favList.length) html += `<div class="section-label" style="margin-top:8px">En cours</div>`;
-    else html += `<div class="section-label">En cours</div>`;
+    if (favList.length) html += `<div class="section-label" style="margin-top:8px">${t('card.section.running')}</div>`;
+    else html += `<div class="section-label">${t('card.section.running')}</div>`;
     html += nfRunning.map(p => rowHtml(p)).join('');
   }
   if (nfIdle.length) {
-    if (favList.length || nfRunning.length) html += `<div class="section-label" style="margin-top:8px">Projets</div>`;
+    if (favList.length || nfRunning.length) html += `<div class="section-label" style="margin-top:8px">${t('card.section.projects')}</div>`;
     html += nfIdle.map(p => rowHtml(p)).join('');
   }
 
@@ -2297,33 +2384,33 @@ function rowHtml(p) {
       ${badge}
     </div>
 
-    <!-- col 3 : chemin -->
+    <!-- col 3: path -->
     <span class="col-path" title="${p.path}">${shortPath}</span>
 
-    <!-- col 4 : date activité -->
+    <!-- col 4: activity date -->
     <span class="col-date ${act?.recent?'recent':''}"${dateTip}>${act?act.label:''}</span>
 
-    <!-- col 5 : boutons -->
+    <!-- col 5: buttons -->
     <div class="prow-actions" id="actions-${p.id}">
       ${inlineActions}
-      <button class="cbtn fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFavorite('${p.id}')" title="${isFav?'Retirer des favoris':'Ajouter aux favoris'}">
+      <button class="cbtn fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFavorite('${p.id}')" title="${isFav?t('card.favRemove'):t('card.favAdd')}">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       </button>
-      <button class="cbtn folder-btn" onclick="openFolder('${p.id}')" title="Ouvrir dans le Finder">
+      <button class="cbtn folder-btn" onclick="openFolder('${p.id}')" title="${t('card.openFolder')}">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </button>
-      ${(()=>{const ide=getProjectIde(p);return`<span class="editor-btn-wrap"><button class="cbtn editor-btn" onclick="openEditor('${p.id}')" title="Ouvrir dans ${ide.name}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>${ide.name}</button><button class="cbtn editor-chevron" onclick="event.stopPropagation();showIdePicker('${p.id}',this)" title="Changer d'éditeur">▾</button></span>`;})()}
-      <button class="cbtn edit-btn" onclick="editProject('${p.id}')" title="Modifier le projet">
+      ${(()=>{const ide=getProjectIde(p);return`<span class="editor-btn-wrap"><button class="cbtn editor-btn" onclick="openEditor('${p.id}')" title="${t('card.openInIde',{name:ide.name})}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>${ide.name}</button><button class="cbtn editor-chevron" onclick="event.stopPropagation();showIdePicker('${p.id}',this)" title="${t('card.changeEditor')}">▾</button></span>`;})()}
+      <button class="cbtn edit-btn" onclick="editProject('${p.id}')" title="${t('card.editProject')}">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </button>
-      <button class="cbtn del-btn" onclick="deleteProject('${p.id}','${p.name.replace(/'/g,"\\'")}',event)" title="Supprimer du registre">
+      <button class="cbtn del-btn" onclick="deleteProject('${p.id}','${p.name.replace(/'/g,"\\'")}',event)" title="${t('card.deleteProject')}">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>
     </div>
 
   </div>
 
-  <!-- ligne 2 : tags + catégories (toujours présente pour le bouton +) -->
+  <!-- row 2: tags + categories (always present for the + button) -->
   <div class="prow-meta">
     ${tags ? `<div class="prow-tags">${tags}</div>` : ''}
     ${catsHtml}
@@ -2334,7 +2421,7 @@ function rowHtml(p) {
 }
 
 function buildInlineActions(p, cmds) {
-  if (!cmds.length) return `<span style="font-size:11px;color:var(--t3)">Aucune commande</span>`;
+  if (!cmds.length) return `<span style="font-size:11px;color:var(--t3)">${t('card.noCommands')}</span>`;
 
   let html = '';
   const isMulti = p.source === 'multi';
@@ -2441,7 +2528,7 @@ async function launch(projectId, commandKey, iid) {
       body: JSON.stringify({projectId, commandKey})
     });
     const data = await r.json();
-    if (!r.ok) { alert(data.error||'Erreur'); return; }
+    if (!r.ok) { alert(data.error||t('common.error')); return; }
     await loadProjects();
     openTab(iid);
   } catch(e){ alert(e.message) }
@@ -2516,13 +2603,13 @@ function closeTab(id) {
   }
   renderTabs();
   if (activeTabId) renderTermBody();
-  else document.getElementById('term-body').innerHTML='<div class="term-empty">Lancez un projet pour voir les logs ici.</div>';
+  else document.getElementById('term-body').innerHTML=`<div class="term-empty">${t('terminal.empty')}</div>`;
 }
 
 function renderTermBody() {
   const body = document.getElementById('term-body');
   const tab  = tabs.get(activeTabId);
-  if (!tab) { body.innerHTML='<div class="term-empty">Aucun log.</div>'; return; }
+  if (!tab) { body.innerHTML=`<div class="term-empty">${t('terminal.noLog')}</div>`; return; }
   body.innerHTML = tab.logs.map(l=>termLine(l)).join('');
   body.scrollTop = body.scrollHeight;
 }
@@ -2580,7 +2667,7 @@ function startScan() {
 
   log.innerHTML=''; footer.style.display='none';
   results.innerHTML=''; results.classList.remove('visible');
-  spinner.className='so-spinner'; text.innerHTML='Scan en cours…';
+  spinner.className='so-spinner'; text.innerHTML=t('scan.inProgress');
   overlay.classList.add('open');
   btn.disabled=true; btn.classList.add('spinning');
 
@@ -2605,10 +2692,15 @@ function startScan() {
     const scanProjects = JSON.parse(e.data);
     const newCount = scanProjects.filter(p => !p.imported).length;
     spinner.className='so-spinner done';
-    text.innerHTML=`Scan terminé`;
+    text.innerHTML=t('scan.done');
     footer.style.display='flex';
-    document.getElementById('so-footer-text').innerHTML=
-      `<strong style="color:var(--tx)">${found}</strong> projet${found!==1?'s':''} détecté${found!==1?'s':''} — <strong style="color:${newCount>0?'var(--ac)':'var(--t2)'}">${newCount} nouveau${newCount!==1?'x':''}</strong>`;
+    document.getElementById('so-footer-text').innerHTML= t('scan.footer', {
+        found: `<strong style="color:var(--tx)">${found}</strong>`,
+        foundPlural: found!==1?'s':'',
+        newPhrase: t(newCount===1?'scan.newOne':'scan.newMany', {
+          count: `<strong style="color:${newCount>0?'var(--ac)':'var(--t2)'}">${newCount}</strong>`
+        }),
+      });
     const importAllBtn = document.getElementById('so-import-all');
     if (newCount > 0) importAllBtn.classList.add('visible');
     else importAllBtn.classList.remove('visible');
@@ -2618,7 +2710,7 @@ function startScan() {
   });
 
   es.onerror = () => {
-    text.innerHTML='<span style="color:var(--rd)">Erreur lors du scan</span>';
+    text.innerHTML=`<span style="color:var(--rd)">${t('scan.error')}</span>`;
     spinner.className='so-spinner done';
     btn.disabled=false; btn.classList.remove('spinning');
     es.close();
@@ -2637,25 +2729,25 @@ function renderScanResults(scanProjectsList) {
   const importedItems = scanProjectsList.filter(p => p.imported);
   let html = '';
   if (newItems.length) {
-    html += `<div class="so-results-header">🆕 Nouveaux (${newItems.length})</div>`;
+    html += `<div class="so-results-header">${t('scan.newHeader', { count: newItems.length })}</div>`;
     html += newItems.map((p, _) => {
       const i = scanProjectsList.indexOf(p);
       const shortPath = p.path.replace(/.*\/dev\//, '~/dev/');
       return `<div class="so-result-item">
         <span class="so-ri-name" title="${escHtml(p.path)}">${escHtml(p.name)}</span>
         <span class="so-ri-path" title="${escHtml(p.path)}">${escHtml(shortPath)}</span>
-        <button class="so-ri-btn" onclick="importFromScan(${i})">⊕ Importer</button>
+        <button class="so-ri-btn" onclick="importFromScan(${i})">${t('scan.importBtn')}</button>
       </div>`;
     }).join('');
   }
   if (importedItems.length) {
-    html += `<div class="so-results-header" style="margin-top:${newItems.length?'0':'0'}">✓ Déjà importés (${importedItems.length})</div>`;
+    html += `<div class="so-results-header" style="margin-top:${newItems.length?'0':'0'}">${t('scan.alreadyHeader', { count: importedItems.length })}</div>`;
     html += importedItems.map(p => {
       const shortPath = p.path.replace(/.*\/dev\//, '~/dev/');
       return `<div class="so-result-item">
         <span class="so-ri-name" title="${escHtml(p.path)}">${escHtml(p.name)}</span>
         <span class="so-ri-path" title="${escHtml(p.path)}">${escHtml(shortPath)}</span>
-        <span class="so-ri-badge imported">✓ Importé</span>
+        <span class="so-ri-badge imported">${t('scan.importedBadge')}</span>
       </div>`;
     }).join('');
   }
@@ -2673,7 +2765,7 @@ function importAllFromScan() {
   const newProjects = lastScanResults.filter(p => !p.imported);
   if (!newProjects.length) return;
   closeScan();
-  // Ouvrir le premier projet à importer (les autres suivront manuellement)
+  // Open the first project to import (the rest will be handled manually)
   openImportPanel({ mode: 'new', prefill: newProjects[0] });
 }
 
@@ -2697,7 +2789,7 @@ async function openEditor(projectId, ideId) {
     if (!r.ok) {
       const d = await r.json();
       const ide = idesList.find(i=>i.id===(ideId||defaultIdeId));
-      alert(`Impossible d'ouvrir ${ide?.name||'l\'éditeur'} : ${d.error}\n\nVérifie que la commande "${ide?.cmd||'code'}" est disponible dans ton PATH.`);
+      alert(t('editor.cantOpen', { name: ide?.name||ide?.cmd||'code', error: d.error, cmd: ide?.cmd||'code' }));
     }
   } catch(e) { alert(e.message); }
 }
@@ -2721,7 +2813,7 @@ function showIdePicker(projectId, anchor) {
   `).join('') + `
     <div class="ide-pick-sep"></div>
     <div class="ide-pick-item" onclick="pickIde('${projectId}',null)" style="color:var(--t3);font-size:11px">
-      Utiliser le défaut (${idesList.find(i=>i.id===defaultIdeId)?.name||defaultIdeId})
+      ${t('ide.useDefault', { name: idesList.find(i=>i.id===defaultIdeId)?.name||defaultIdeId })}
     </div>
   `;
 
@@ -2784,7 +2876,7 @@ function renderCatBar() {
   if (!pills) return;
 
   if (!allCategories.length) {
-    pills.innerHTML = `<span class="cat-bar-empty">Aucune catégorie — cliquez sur Gérer pour en créer</span>`;
+    pills.innerHTML = `<span class="cat-bar-empty">${t('cat.empty')}</span>`;
     document.getElementById('cat-bar-clear')?.classList.remove('visible');
     return;
   }
@@ -2831,14 +2923,14 @@ function catChipsHtml(projectId) {
   const chips = assigned.map(cat => {
     const bg = hexToRgba(cat.color, .15);
     return `<span class="cat-chip" style="background:${bg};color:${cat.color};border-color:${hexToRgba(cat.color,.3)}"
-      onclick="event.stopPropagation();toggleCatFilter('${cat.id}')" title="Filtrer par ${escHtml(cat.name)}">
+      onclick="event.stopPropagation();toggleCatFilter('${cat.id}')" title="${t('cat.filterBy', { name: escHtml(cat.name) })}">
       <span class="cat-chip-dot" style="background:${cat.color}"></span>
       ${escHtml(cat.name)}
     </span>`;
   }).join('');
   return `<span class="prow-cats">
     ${chips}
-    <button class="cat-assign-btn" title="Assigner une catégorie"
+    <button class="cat-assign-btn" title="${t('cat.assignTitle')}"
       onclick="event.stopPropagation();openCatPopover('${projectId}',this)">+</button>
   </span>`;
 }
@@ -2855,7 +2947,7 @@ function openCatPopover(projectId, anchor) {
   let html = '';
 
   if (!allCategories.length) {
-    html = `<div class="cat-pop-empty">Aucune catégorie encore.<br>Créez-en une ci-dessous.</div>`;
+    html = `<div class="cat-pop-empty">${t('cat.popEmpty').replace('\n','<br>')}</div>`;
   } else {
     html = allCategories.map(cat => {
       const isAssigned = assigned.has(cat.id);
@@ -2869,7 +2961,7 @@ function openCatPopover(projectId, anchor) {
 
   html += `<div class="cat-pop-sep"></div>
     <div class="cat-pop-new">
-      <input id="pop-new-cat" type="text" placeholder="Nouvelle catégorie…" onkeydown="if(event.key==='Enter')quickCreateCat('${projectId}')"/>
+      <input id="pop-new-cat" type="text" placeholder="${t('cat.popPlaceholder')}" onkeydown="if(event.key==='Enter')quickCreateCat('${projectId}')"/>
       <button onclick="quickCreateCat('${projectId}')">+</button>
     </div>`;
 
@@ -2928,17 +3020,17 @@ function renderSettingsCats() {
   const list = document.getElementById('settings-cat-list');
   if (!list) return;
   if (!allCategories.length) {
-    list.innerHTML = `<p style="font-size:11px;color:var(--t3)">Aucune catégorie. Créez-en une ci-dessous.</p>`;
+    list.innerHTML = `<p style="font-size:11px;color:var(--t3)">${t('cat.noCategories')}</p>`;
     return;
   }
   list.innerHTML = allCategories.map(cat => `
     <div class="cat-settings-row" id="cat-row-${cat.id}">
-      <span class="cat-settings-dot" style="background:${cat.color}" title="Changer la couleur"
+      <span class="cat-settings-dot" style="background:${cat.color}" title="${t('cat.changeColor')}"
         onclick="openColorPicker('${cat.id}',this)"></span>
       <input class="cat-settings-name" value="${escHtml(cat.name)}"
         onblur="renameCat('${cat.id}',this.value)"
         onkeydown="if(event.key==='Enter')this.blur()"/>
-      <button class="cat-settings-del" onclick="deleteCat('${cat.id}')" title="Supprimer">✕</button>
+      <button class="cat-settings-del" onclick="deleteCat('${cat.id}')" title="${t('ide.delete')}">✕</button>
     </div>`).join('');
 }
 
@@ -2974,7 +3066,7 @@ async function renameCat(id, newName) {
 }
 
 async function deleteCat(id) {
-  if (!confirm('Supprimer cette catégorie et ses assignations ?')) return;
+  if (!confirm(t('confirm.deleteCat'))) return;
   await fetch(`/api/categories/${id}`, { method:'DELETE' });
   await loadCategories();
   activeCatFilters.delete(id);
@@ -3042,12 +3134,13 @@ async function openSettings() {
     defaultIdeId  = s.defaultIde || defaultIdeId;
     renderIdeSettings();
   } catch(e) { console.warn(e); }
-  // Version de l'application (À propos)
+  await populateLangSelector();
+  // Version de l'application (About)
   try {
     const v = await fetch('/api/version').then(r => r.json());
     const el = document.getElementById('about-version');
-    if (el) el.innerHTML = `Dev Launcher <strong>v${v.version}</strong> · version de développement (pré-1.0, peut contenir des changements cassants)`;
-  } catch(e) { console.warn(e); }
+    if (el) el.textContent = t('about.version', { version: v.version });
+  } catch (e) { console.warn(e); }
 }
 
 function closeSettings() {
@@ -3076,7 +3169,7 @@ async function saveSettings() {
   document.getElementById('cfg-devRoot').classList.remove('error');
 
   btn.disabled = true;
-  btn.textContent = 'Enregistrement…';
+  btn.textContent = t('common.saving');
   try {
     const r = await fetch('/api/settings', {
       method: 'POST',
@@ -3084,11 +3177,11 @@ async function saveSettings() {
       body: JSON.stringify({ devRoot, scanDepth, ignoreDirs, ides: idesList, defaultIde: defaultIdeId }),
     });
     const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Erreur serveur');
+    if (!r.ok) throw new Error(data.error || t('common.serverError'));
 
-    msg.textContent = '✓ Paramètres sauvegardés';
+    msg.textContent = t('settings.saved');
     msg.className = 'settings-msg ok';
-    btn.textContent = 'Enregistrer et rescanner';
+    btn.textContent = t('settings.save');
     btn.disabled = false;
 
     // Rescan and close after short delay
@@ -3099,7 +3192,7 @@ async function saveSettings() {
   } catch(e) {
     msg.textContent = '✗ ' + e.message;
     msg.className = 'settings-msg err';
-    btn.textContent = 'Enregistrer et rescanner';
+    btn.textContent = t('settings.save');
     btn.disabled = false;
   }
 }
@@ -3113,7 +3206,7 @@ async function pickFolderInto(inputId) {
     const url = '/api/pick-folder' + (current ? '?current=' + encodeURIComponent(current) : '');
     const r = await fetch(url);
     if (!r.ok) {
-      // Mode web : le sélecteur natif n'est pas disponible, on laisse l'utilisateur taper
+      // Web mode: the native picker is not available, let the user type manually
       return;
     }
     const data = await r.json();
@@ -3121,7 +3214,7 @@ async function pickFolderInto(inputId) {
       input.value = data.path;
       input.dispatchEvent(new Event('input'));
     }
-  } catch { /* silencieux */ }
+  } catch { /* silent */ }
 }
 
 // ══ IDE Settings ══════════════════════════════════════════════════════════
@@ -3130,7 +3223,7 @@ function renderIdeSettings() {
   const list = document.getElementById('settings-ide-list');
   if (!list) return;
   if (!idesList.length) {
-    list.innerHTML = '<div style="color:var(--t3);font-size:12px;padding:4px 0">Aucun éditeur configuré.</div>';
+    list.innerHTML = `<div style="color:var(--t3);font-size:12px;padding:4px 0">${t('ide.noEditor')}</div>`;
     return;
   }
   list.innerHTML = idesList.map((ide, i) => `
@@ -3141,8 +3234,8 @@ function renderIdeSettings() {
       </div>
       <button class="ide-settings-star ${ide.id === defaultIdeId ? 'active' : ''}"
               onclick="setDefaultIde('${ide.id}')"
-              title="${ide.id === defaultIdeId ? 'Éditeur par défaut' : 'Définir comme défaut'}">★</button>
-      <button class="ide-settings-del" onclick="removeIde(${i})" title="Supprimer">✕</button>
+              title="${ide.id === defaultIdeId ? t('ide.isDefault') : t('ide.setDefault')}">★</button>
+      <button class="ide-settings-del" onclick="removeIde(${i})" title="${t('ide.delete')}">✕</button>
     </div>
   `).join('');
 }
@@ -3240,8 +3333,8 @@ function openImportPanel(opts = {}) {
   form.style.display = 'none';
 
   if (importState.mode === 'new') {
-    title.textContent = 'Importer un projet';
-    submit.textContent = 'Importer';
+    title.textContent = t('import.title');
+    submit.textContent = t('import.save');
     detectSec.style.display = '';
     pathDisplayWrap.style.display = 'none';
     pathInput.value = '';
@@ -3256,8 +3349,8 @@ function openImportPanel(opts = {}) {
     }
   } else {
     // Edit mode
-    title.textContent = 'Modifier le projet';
-    submit.textContent = 'Enregistrer';
+    title.textContent = t('import.titleEdit');
+    submit.textContent = t('import.saveEdit');
     detectSec.style.display = 'none';
     pathDisplayWrap.style.display = '';
 
@@ -3292,16 +3385,16 @@ function fillImportForm(data) {
   document.getElementById('import-description').value = data.description || '';
   importState.selectedColor = data.color || IMPORT_COLORS[0];
 
-  // Composants
+  // Components
   const initialComps = data.components || data.tags || [];
   importState.selectedComponents = new Set(initialComps);
 
-  // Catégories initiales (pour détecter les changements en mode édition)
+  // Initial categories (to detect changes in edit mode)
   const pid = importState.projectId;
   importState.originalCategoryIds = new Set(pid ? (catAssignments[pid] || []) : []);
   importState.pendingCatIds = new Set(importState.originalCategoryIds);
 
-  // Type : calculer les types compatibles et initialiser la sélection
+  // Type: compute compatible types and initialize selection
   importState.compatInfo       = computeCompatibleTypes({ ...data, components: initialComps });
   importState.autoDetectedType = importState.compatInfo.autoDetected;
   importState.selectedType     = data.type || data.typeOverride || importState.compatInfo.autoDetected;
@@ -3333,25 +3426,25 @@ function renderImportTypeGrid() {
     const isSelected  = selected === type;
     const isAuto      = autoDetected === type;
     const isDisc      = discouraged.includes(type);
-    const starHtml    = isAuto ? `<span class="type-sel-star" title="Type auto-détecté">●</span>` : '';
+    const starHtml    = isAuto ? `<span class="type-sel-star" title="${t('type.autoDetected')}">●</span>` : '';
     const warnHtml    = isDisc && !isSelected ? `<span class="type-sel-warn-icon">⚠</span>` : '';
     const typeColor   = def.color;
     const typeBg      = def.bg;
+    const label       = typeLabel(type);
     return `<button class="type-sel-btn ${isSelected?'active':''} ${isDisc?'discouraged':''}"
       style="--type-color:${typeColor};--type-bg:${typeBg}"
-      title="${def.label}${isDisc?' — inhabituel pour ce stack':''}"
+      title="${label}${isDisc?' — '+t('type.uncommonHint'):''}"
       onclick="selectImportType('${type}')">
       ${starHtml}
       <span style="color:${isSelected?typeColor:'var(--t3)'};">${def.svg}</span>
-      ${def.label.split('/')[0].trim()}
+      ${label.split('/')[0].trim()}
       ${warnHtml}
     </button>`;
   }).join('');
 
   // Warning if selected type is discouraged
   if (discouraged.includes(selected) && selected !== 'unknown') {
-    const def = PROJECT_TYPES[selected];
-    warnEl.textContent = `⚠ "${def?.label}" est inhabituel pour le stack détecté. Confirmez si c'est intentionnel.`;
+    warnEl.textContent = t('type.uncommon', { type: typeLabel(selected) });
     warnEl.classList.add('visible');
   } else {
     warnEl.classList.remove('visible');
@@ -3386,14 +3479,14 @@ function makeCommandRow(data = {}) {
   const row = document.createElement('div');
   row.className = 'cmd-row';
   row.innerHTML = `
-    <input class="cmd-key"   placeholder="clé"      value="${escHtml(data.key||'')}"   title="Identifiant (ex: dev, start)"/>
+    <input class="cmd-key"   placeholder="${t('cmd.key.placeholder')}"   value="${escHtml(data.key||'')}"   title="${t('cmd.key.title')}"/>
     <span class="cmd-row-sep">·</span>
-    <input class="cmd-label" placeholder="label"    value="${escHtml(data.label||'')}" title="Texte affiché sur le bouton"/>
+    <input class="cmd-label" placeholder="label"    value="${escHtml(data.label||'')}" title="${t('cmd.label.title')}"/>
     <span class="cmd-row-sep">·</span>
-    <input class="cmd-cmd"   placeholder="commande" value="${escHtml(data.cmd||'')}"   title="Commande shell à exécuter"/>
+    <input class="cmd-cmd"   placeholder="command"  value="${escHtml(data.cmd||'')}"   title="${t('cmd.cmd.title')}"/>
     <span class="cmd-row-sep">:</span>
-    <input class="cmd-port"  placeholder="port"     value="${escHtml(String(data.port||''))}" title="Port (optionnel)" type="number" min="1" max="65535"/>
-    <button class="cmd-del" onclick="this.closest('.cmd-row').remove()" title="Supprimer">✕</button>`;
+    <input class="cmd-port"  placeholder="port"     value="${escHtml(String(data.port||''))}" title="${t('cmd.port.title')}" type="number" min="1" max="65535"/>
+    <button class="cmd-del" onclick="this.closest('.cmd-row').remove()" title="${t('cmd.del.title')}">✕</button>`;
   return row;
 }
 
@@ -3410,10 +3503,10 @@ function getImportFormData() {
   const desc  = document.getElementById('import-description').value.trim();
   const color = importState.selectedColor || IMPORT_COLORS[0];
 
-  // Composants sélectionnés
+  // Selected components
   const components = [...importState.selectedComponents];
 
-  // Type : sauvegarder seulement si différent de l'auto-détecté
+  // Type: save only if different from the auto-detected one
   const type = (importState.selectedType && importState.selectedType !== importState.autoDetectedType)
     ? importState.selectedType
     : null;
@@ -3445,7 +3538,7 @@ function renderComponentPicker() {
 
   // Active chips (selected components)
   if (selected.size === 0) {
-    activeEl.innerHTML = '<span class="comp-active-empty">Aucun composant sélectionné</span>';
+    activeEl.innerHTML = `<span class="comp-active-empty">${t('import.components.empty')}</span>`;
   } else {
     activeEl.innerHTML = [...selected].map(comp => {
       const kc = KNOWN_COMPONENTS[comp];
@@ -3455,7 +3548,7 @@ function renderComponentPicker() {
         style="color:${color};background:${color}18;border-color:${color}40"
         onclick="toggleComponent('${comp}')">
         ${label}
-        <button class="cc-del" onclick="event.stopPropagation();toggleComponent('${comp}')" title="Retirer">✕</button>
+        <button class="cc-del" onclick="event.stopPropagation();toggleComponent('${comp}')" title="${t('cmd.remove.title')}">✕</button>
       </span>`;
     }).join('');
   }
@@ -3509,7 +3602,7 @@ function renderImportCatPicker() {
   if (!listEl) return;
 
   if (!allCategories.length) {
-    listEl.innerHTML = '<span style="font-size:11px;color:var(--t3);font-style:italic">Aucune catégorie. Créez-en dans les paramètres.</span>';
+    listEl.innerHTML = `<span style="font-size:11px;color:var(--t3);font-style:italic">${t('cat.noCategoriesImport')}</span>`;
     return;
   }
 
@@ -3565,7 +3658,7 @@ async function detectImportProject() {
     });
     const data = await r.json();
     if (!r.ok) {
-      msg.textContent = data.error || 'Erreur';
+      msg.textContent = data.error || t('common.error');
       msg.className = 'import-msg err';
       return;
     }
@@ -3581,7 +3674,7 @@ async function detectImportProject() {
     msg.className = 'import-msg err';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Détecter';
+    btn.textContent = t('import.detect');
   }
 }
 
@@ -3592,7 +3685,7 @@ async function saveImport() {
   const { name, description, components, color, commands, type } = getImportFormData();
   if (!name) {
     document.getElementById('import-name').focus();
-    msg.textContent = 'Le nom est obligatoire';
+    msg.textContent = t('import.nameRequired');
     msg.className = 'import-msg err';
     return;
   }
@@ -3607,7 +3700,7 @@ async function saveImport() {
     if (importState.mode === 'new') {
       const dirPath = document.getElementById('import-path-input').value.trim();
       if (!dirPath) {
-        msg.textContent = 'Chemin requis';
+        msg.textContent = t('import.pathRequired');
         msg.className = 'import-msg err';
         return;
       }
@@ -3622,9 +3715,9 @@ async function saveImport() {
         document.getElementById('import-dup-warn').classList.add('visible');
         return;
       }
-      if (!r.ok) throw new Error(data.error || 'Erreur serveur');
+      if (!r.ok) throw new Error(data.error || t('common.serverError'));
       savedProjectId = data.id;
-      msg.textContent = '✓ Projet importé avec succès';
+      msg.textContent = t('import.success');
       msg.className = 'import-msg ok';
     } else {
       const r = await fetch(`/api/projects/${importState.projectId}`, {
@@ -3632,8 +3725,8 @@ async function saveImport() {
         body: JSON.stringify({ name, description, components, color, commands, type }),
       });
       const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'Erreur serveur');
-      msg.textContent = '✓ Projet mis à jour';
+      if (!r.ok) throw new Error(data.error || t('common.serverError'));
+      msg.textContent = t('import.updated');
       msg.className = 'import-msg ok';
     }
 
@@ -3664,7 +3757,7 @@ async function saveImport() {
     msg.className = 'import-msg err';
   } finally {
     submit.disabled = false;
-    submit.textContent = importState.mode === 'new' ? 'Importer' : 'Enregistrer';
+    submit.textContent = importState.mode === 'new' ? t('import.save') : t('import.saveEdit');
   }
 }
 
@@ -3675,15 +3768,15 @@ function editProject(projectId) {
 
 async function deleteProject(projectId, projectName, event) {
   event?.stopPropagation();
-  if (!confirm(`Supprimer "${projectName}" du registre ?\n\nLe dossier ne sera pas supprimé, seulement retiré de Dev Launcher.`)) return;
+  if (!confirm(t('confirm.deleteProject', { name: projectName }))) return;
   try {
     const r = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
-    if (!r.ok) { const d = await r.json(); alert(d.error || 'Erreur'); return; }
+    if (!r.ok) { const d = await r.json(); alert(d.error || t('common.error')); return; }
     await loadProjects();
   } catch(e) { alert(e.message); }
 }
 
-// ══ Sync temps réel (SSE) ══════════════════════════════════════════════════
+// ══ Real-time sync (SSE) ══════════════════════════════════════════════════
 function connectEvents() {
   const es = new EventSource('/api/events');
 
@@ -3716,7 +3809,11 @@ async function initSettings() {
 }
 
 loadCategories();
-initSettings().then(() => loadFavorites()).then(() => loadProjects());
+initI18n()
+  .catch(err => console.error('i18n boot failed', err))
+  .then(() => initSettings())
+  .then(() => loadFavorites())
+  .then(() => loadProjects());
 setInterval(loadProjects, 10000);
 connectEvents();
 
@@ -3743,9 +3840,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Fermer le popover de catégories
+// Close the categories popover
 document.addEventListener('click', e => {
-  // Fermer le popover de catégories
+  // Close the categories popover
   const pop = document.getElementById('cat-popover');
   if (pop?.classList.contains('open') && !pop.contains(e.target) && !e.target.closest('.cat-assign-btn')) {
     closeCatPopover();

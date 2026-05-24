@@ -1,123 +1,163 @@
 # Dev Launcher — CLAUDE.md
 
-Outil de gestion de projets locaux. Deux modes de lancement : application web pure (`npm start`) ou application Electron avec icône tray (`npm run app`). L'objectif du projet est **la simplicité** — éviter la sur-ingénierie.
+A local project management tool. Two launch modes: pure web app (`npm start`) or Electron app with a system-tray icon (`npm run app`). The project goal is **simplicity** — avoid over-engineering.
 
-## Lancer le projet
+## Running the project
 
 ```bash
-npm start          # serveur web seul → http://localhost:4242
-npm run dev        # serveur web avec --watch (rechargement auto)
-npm run app        # Electron (tray + fenêtre flottante)
-npm run app:dev    # Electron en mode dev (DevTools ouverts)
+npm start          # web server only → http://localhost:4242
+npm run dev        # web server with --watch (auto-reload)
+npm run app        # Electron (tray + floating window)
+npm run app:dev    # Electron in dev mode (DevTools open)
+npm test           # run all tests (node --test, no extra deps)
 ```
 
 ## Architecture
 
 ```
 Launcher/
-├── main.js              # Electron : tray, BrowserWindow, positionnement
-├── server.js            # Express : toute la logique backend + API REST + SSE
-├── launcher.config.js   # Config statique (devRoot, port 4242, scanDepth, ignoreDirs)
+├── main.js              # Electron: tray, BrowserWindow, positioning
+├── server.js            # Express: all backend logic + REST API + SSE
+├── launcher.config.js   # Static config (devRoot, port 4242, scanDepth, ignoreDirs)
 ├── public/
-│   └── index.html       # Frontend complet — CSS + JS inline, single-file
+│   ├── index.html       # Complete frontend — CSS + JS inline, single-file
+│   └── i18n.js          # Shared translate/detectLang module (server + browser)
+├── locales/
+│   ├── en.json          # Base language (English) — source of truth for keys
+│   └── fr.json          # French translation
+├── test/                # Test files (node --test runner)
 ├── assets/
-│   ├── icon-launch.png      # Icône tray 16×16 (1x)
-│   └── icon-launch@2x.png   # Icône tray 32×32 (Retina)
-├── example.launcher.yml # Exemple de config projet
+│   ├── icon-launch.png      # Tray icon 16x16 (1x)
+│   └── icon-launch@2x.png   # Tray icon 32x32 (Retina)
+├── example.launcher.yml # Example project config
 │
-# Fichiers JSON persistés (créés automatiquement, ne pas commiter)
-├── projects.json        # Registre des projets (path, name, ideId, …)
-├── favorites.json       # Liste des IDs favoris
-├── categories.json      # Catégories fonctionnelles
-└── settings.json        # Paramètres utilisateur (devRoot, ides, …)
+# Persisted JSON files (auto-created, gitignored — do NOT commit)
+├── projects.json        # Project registry (path, name, ideId, ...)
+├── favorites.json       # List of favorite project IDs
+├── categories.json      # Functional categories
+└── settings.json        # User settings (devRoot, ides, lang, schemaVersion, ...)
 ```
 
-## Principe de fonctionnement
+## How it works
 
-**Electron** charge `server.js` directement via `require('./server.js')` dans le processus principal — pas de sous-processus. La fenêtre charge `http://localhost:4242`. L'icône tray toggle la fenêtre.
+**Electron** loads `server.js` directly via `require('./server.js')` in the main process — no subprocess. The window loads `http://localhost:4242`. The tray icon toggles the window.
 
-**server.js** est autonome : il peut tourner seul (`node server.js`) ou dans Electron. Il ne dépend d'aucune API Electron *sauf* `/api/pick-folder` qui fait `require('electron').dialog` avec un try/catch pour dégrader silencieusement en mode web.
+**server.js** is self-contained: it can run standalone (`node server.js`) or inside Electron. It depends on no Electron API *except* `/api/pick-folder`, which does `require('electron').dialog` with a try/catch to degrade silently in web mode.
 
-**Le frontend** (`public/index.html`) est un fichier unique — tout le CSS et le JS sont inline. Pas de bundler, pas de framework. Modifier ce fichier directement.
+**The frontend** (`public/index.html`) is a single file — all CSS and JS are inline. No bundler, no framework. Edit this file directly.
 
-## API REST (server.js)
+## Security model
 
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/projects` | Liste des projets du registre |
-| POST | `/api/projects` | Ajouter un projet manuellement |
-| PATCH | `/api/projects/:id` | Modifier un projet |
-| DELETE | `/api/projects/:id` | Supprimer du registre |
-| PATCH | `/api/projects/:id/ide` | Définir l'IDE préféré d'un projet |
-| POST | `/api/detect` | Auto-détecter un projet depuis un chemin |
-| POST | `/api/scan` | Scanner le devRoot (SSE stream) |
-| POST | `/api/launch` | Démarrer une commande d'un projet |
-| POST | `/api/stop` | Arrêter une commande |
-| GET | `/api/logs/:tabId` | Logs d'une commande (SSE stream) |
-| GET | `/api/events` | Flux SSE temps réel (favoris, IDE, …) |
-| GET | `/api/favorites` | Liste des IDs favoris |
-| POST | `/api/favorites` | Ajouter un favori |
-| DELETE | `/api/favorites/:id` | Retirer un favori |
-| POST | `/api/open-editor` | Ouvrir dans l'IDE (prend `projectId`, `ideId` optionnel) |
-| POST | `/api/open-folder` | Ouvrir dans l'explorateur (cross-platform) |
-| GET | `/api/pick-folder` | Sélecteur de dossier natif Electron |
-| GET | `/api/settings` | Lire les paramètres |
-| POST | `/api/settings` | Sauvegarder + rescanner |
-| GET/POST/… | `/api/categories` | CRUD catégories |
+**IMPORTANT:** `/api/launch` executes arbitrary shell commands. Two safeguards prevent network exposure:
 
-## Sync temps réel (SSE)
+1. The server listens **only on `127.0.0.1`** (loopback). It never binds to `0.0.0.0`.
+2. A **Host-header guard** rejects any request whose `Host` does not resolve to the local machine — this blocks DNS-rebinding attacks (a malicious website in the browser cannot control the launcher).
 
-Le serveur maintient un `Set` de clients SSE connectés sur `/api/events`. La fonction `broadcast(event, data)` pousse à tous les clients connectés. Événements émis :
+The allowed hosts are: `localhost`, `127.0.0.1`, `[::1]`, `::1`.
 
-- `favorites-changed` — payload : `[...ids]`
-- `project-ide-changed` — payload : `{ id, ideId }`
+**Never expose the launcher on the network.** It has no authentication. Doing so would be equivalent to offering unauthenticated remote code execution.
 
-Le frontend reconnecte automatiquement toutes les 3 secondes si la connexion est perdue.
+The port defaults to `4242` and is overridable via the `PORT` environment variable (see `launcher.config.js`).
 
-## Persistance
+## REST API (server.js)
 
-Tout est en JSON à la racine du projet. Le pattern est identique pour chaque fichier :
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/projects` | List projects in the registry (enriched with git, activity, categories) |
+| POST | `/api/projects` | Import a project into the registry |
+| PUT | `/api/projects/:id` | Update a project in the registry |
+| DELETE | `/api/projects/:id` | Remove a project from the registry |
+| PATCH | `/api/projects/:id/ide` | Set the preferred IDE for a project |
+| POST | `/api/projects/detect` | Auto-detect a project from a path (without importing) |
+| GET | `/api/scan-stream` | Scan devRoot with real-time progress (SSE stream) |
+| POST | `/api/launch` | Start a project command |
+| POST | `/api/stop` | Stop a running command |
+| GET | `/api/logs/:instanceId` | Log stream for a running command (SSE) |
+| GET | `/api/events` | Real-time SSE broadcast (favorites, IDE changes, ...) |
+| GET | `/api/favorites` | List favorite project IDs |
+| POST | `/api/favorites/:id` | Add a favorite |
+| DELETE | `/api/favorites/:id` | Remove a favorite |
+| POST | `/api/open-editor` | Open project in IDE (body: `projectId`, optional `ideId`) |
+| POST | `/api/open-folder` | Open project folder in file explorer (cross-platform) |
+| GET | `/api/pick-folder` | Native folder picker dialog (Electron only) |
+| GET | `/api/settings` | Read current settings |
+| POST | `/api/settings` | Save settings (also reloads catalogs) |
+| GET | `/api/categories` | Get all categories and assignments |
+| POST | `/api/categories` | Create or update a category |
+| DELETE | `/api/categories/:id` | Delete a category |
+| POST | `/api/categories/assign` | Assign/unassign a category to a project |
+| GET | `/api/locales` | List available locales (code + display name) |
+| GET | `/api/version` | App name, version, and schemaVersion |
+| GET | `/api/status` | Map of all running command instances |
+| GET | `/api/port-check/:port` | Check whether a local port is in use |
+
+## Real-time sync (SSE)
+
+The server maintains a `Set` of SSE clients connected on `/api/events`. The `broadcast(event, data)` function pushes to all connected clients. Events emitted:
+
+- `favorites-changed` — payload: `[...ids]`
+- `project-ide-changed` — payload: `{ id, ideId }`
+
+The frontend auto-reconnects every 3 seconds if the connection is lost.
+
+## Persistence
+
+All data is in JSON at the project root. The pattern is the same for each file:
 
 ```js
-// Lecture avec fallback sur valeur par défaut
+// Read with fallback to default value
 if (fs.existsSync(FILE)) data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
-// Écriture
+// Write
 fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 ```
 
-`settings.json` est mergé avec `SETTINGS_DEFAULTS` à la lecture — les nouvelles clés de config sont donc rétrocompatibles.
+`settings.json` is merged with `SETTINGS_DEFAULTS` on read — new config keys are therefore backward-compatible. `settings.json` now includes a `schemaVersion` field. On startup, `runMigrations()` compares the stored version against `CURRENT_SCHEMA_VERSION` and runs any pending migration steps (currently: registry schema normalization at v1). The JSON data files are gitignored and must not be committed.
+
+## i18n system
+
+Translations live in `locales/en.json` (the base / source of truth) and `locales/fr.json`. The module `public/i18n.js` exports `translate(catalogs, lang, key, params)` and `detectLang(navLang, supported)` — it is a **shared module** loaded by both the server (`require('./public/i18n.js')`) and the browser (`<script src="/i18n.js">`).
+
+The server exposes a `t(key, lang, params)` helper used in request handlers and scan logs. The frontend exposes `t(key, params)` (uses the active language) and `applyTranslations()` (updates `data-i18n` elements in the DOM). A language selector in the UI writes the choice to `settings.json` (`lang` field) and also caches it in `localStorage` (`dlLang`). On first launch with no stored preference, the frontend detects the browser language via `navigator.language` (`detectLang`), applies it, and POSTs the chosen language to `/api/settings` so the server can localize its own messages.
+
+English is the base — every key must exist in `en.json`. French (`fr.json`) is a translation. To add a language, drop `locales/<code>.json` (include a `_meta.name` key for the display name) — no code change required. The server's `/api/locales` endpoint auto-discovers all files in `locales/`.
+
+**Repository source (comments, logs, docs) is English-only.** French exists only as a runtime locale file.
 
 ## IDEs
 
-La liste des IDEs est configurable par l'utilisateur dans les Paramètres (stockée dans `settings.json` → `ides[]`). Chaque IDE a `{ id, name, cmd }`.
+The IDE list is configurable by the user in Settings (stored in `settings.json` -> `ides[]`). Each IDE entry is `{ id, name, cmd }`.
 
-`resolveIdeExec(ide)` cherche le binaire dans `IDE_CANDIDATES[ide.id][platform]` (chemins connus par OS), puis tombe en fallback sur `ide.cmd` (doit être dans le PATH). Plateforme détectée via `process.platform` (`darwin` / `win32` / `linux`).
+`resolveIdeExec(ide)` looks for the binary in `IDE_CANDIDATES[ide.id][platform]` (known per-OS paths), then falls back to `ide.cmd` (must be in the PATH). Platform detected via `process.platform` (`darwin` / `win32` / `linux`).
 
-Chaque projet peut avoir un `ideId` qui override le `defaultIde` global.
+Each project can have an `ideId` that overrides the global `defaultIde`.
 
-## Electron — points importants
+## Electron — key points
 
-- `app.dock.hide()` et `icon.setTemplateImage(true)` sont guardés `if (process.platform === 'darwin')`
-- `positionNearTray()` détecte le bord de l'écran où se trouve la taskbar (haut/bas/gauche/droite) en comparant `workArea` et `bounds` de l'écran — compatible macOS, Windows, Linux
-- La fenêtre se masque au `blur` (sauf si DevTools ouverts en mode dev)
-- `app.on('window-all-closed', e => e.preventDefault())` — l'app reste vivante dans le tray
+- `app.dock.hide()` and `icon.setTemplateImage(true)` are guarded with `if (process.platform === 'darwin')`
+- `positionNearTray()` detects the screen edge where the taskbar is (top/bottom/left/right) by comparing `workArea` and `bounds` — compatible with macOS, Windows, Linux
+- The window hides on `blur` (except when DevTools are open in dev mode)
+- `app.on('window-all-closed', e => e.preventDefault())` — the app stays alive in the tray
 
-## Ouverture de dossier (cross-platform)
+## Folder opening (cross-platform)
 
 ```js
 const cmd = platform === 'win32' ? 'explorer' : platform === 'darwin' ? 'open' : 'xdg-open';
 spawn(cmd, [project.path], { detached: true, stdio: 'ignore' });
 ```
 
-## Format .launcher.yml
+## .launcher.yml format
 
-Fichier optionnel placé à la racine d'un projet pour définir ses commandes. Voir `example.launcher.yml`. Le scan auto-détecte également les projets sans ce fichier (via `package.json`, `*.csproj`, `Makefile`, `docker-compose.yml`, `*.py`, etc.).
+Optional file placed at the root of a project to define its commands. See `example.launcher.yml`. The scan also auto-detects projects without this file (via `package.json`, `*.csproj`, `Makefile`, `docker-compose.yml`, `*.py`, etc.).
+
+## Tests
+
+Tests live in `test/` and use Node's built-in `node --test` runner — no test framework dependency. Run with `npm test`. The `locales.test.js` file enforces key parity between `en.json` and `fr.json` (all English keys must exist in French, and vice versa).
 
 ## Conventions
 
-- **Pas de bundler** — le frontend est un fichier HTML unique avec CSS/JS inline
-- **Pas de framework frontend** — vanilla JS avec template literals pour le HTML dynamique
-- **Simplicité avant tout** — éviter d'ajouter des dépendances inutiles
-- Le thème (dark/light) est le seul état conservé dans `localStorage` (`dlTheme`) — tout le reste est côté serveur
-- Les classes CSS utilisent des variables CSS (`--bg`, `--tx`, `--ac`, etc.) pour le theming
-- Le port est `4242` (défini dans `launcher.config.js`)
+- **No bundler** — the frontend is a single HTML file with inline CSS/JS
+- **No frontend framework** — vanilla JS with template literals for dynamic HTML
+- **Simplicity first** — avoid adding unnecessary dependencies
+- The theme (dark/light) and language preference are the two client-cached prefs: `localStorage` keys `dlTheme` and `dlLang`. Language is also backed by `settings.json` (`lang`). Everything else is server-side.
+- CSS classes use CSS variables (`--bg`, `--tx`, `--ac`, etc.) for theming
+- The port is `4242` (defined in `launcher.config.js`, overridable via `PORT` env var)

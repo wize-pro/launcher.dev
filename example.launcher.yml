@@ -1,42 +1,42 @@
 # ─────────────────────────────────────────────────────────────
-# Exemple de .launcher.yml
-# Copie ce fichier à la racine de ton projet, renomme-le .launcher.yml
-# et adapte les commandes.
+# Example .launcher.yml
+# Copy this file to the root of your project, rename it .launcher.yml,
+# and adapt the commands to your needs.
 # ─────────────────────────────────────────────────────────────
 
-name: "Mon Projet"
-description: "Une courte description optionnelle"
+name: "My Project"
+description: "A short optional description"
 
-# Tags libres — servent de filtres dans l'interface
+# Free-form tags — used as filters in the UI
 tags: [backend, dotnet, work]
 
-# Couleur de la barre latérale de la carte (optionnel)
-# Couleurs suggérées :
-#   #6366f1 violet (défaut)  |  #22c55e vert   |  #f59e0b jaune
-#   #3b82f6 bleu             |  #ef4444 rouge  |  #ec4899 rose
+# Sidebar accent color for the project card (optional)
+# Suggested colors:
+#   #6366f1 violet (default)  |  #22c55e green  |  #f59e0b yellow
+#   #3b82f6 blue              |  #ef4444 red    |  #ec4899 pink
 color: "#6366f1"
 
-# Commandes disponibles (clé libre, tu peux en mettre autant que tu veux)
+# Available commands (free keys — add as many as you need)
 commands:
 
   # ── .NET ──────────────────────────────────────────────────
   dev:
-    label: "Dev local"
+    label: "Local dev"
     cmd: "dotnet run"
-    cwd: "./src/MonApi"    # chemin relatif à la racine du projet
-    port: 5000             # optionnel — affiche un lien cliquable vers localhost:PORT
+    cwd: "./src/MyApi"    # path relative to the project root
+    port: 5000             # optional — shows a clickable link to localhost:PORT
 
   watch:
     label: "Dev (watch)"
     cmd: "dotnet watch run"
-    cwd: "./src/MonApi"
+    cwd: "./src/MyApi"
     port: 5000
 
   # ── Docker ────────────────────────────────────────────────
   docker:
     label: "Docker Compose"
     cmd: "docker-compose up"
-    # pas de cwd = racine du projet
+    # no cwd = project root
     port: 8080
 
   docker-build:

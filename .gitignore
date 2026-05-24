@@ -1,14 +1,14 @@
-# Dépendances
+# Dependencies
 node_modules/
 
-# Données locales de l'utilisateur — NE JAMAIS COMMITER
-# (contiennent chemins absolus, noms de projets, préférences personnelles)
+# User-local data — NEVER COMMIT
+# (contain absolute paths, project names, personal preferences)
 projects.json
 favorites.json
 categories.json
 settings.json
 
-# Build / packaging Electron
+# Electron build / packaging output
 dist/
 out/
 build/
@@ -23,6 +23,8 @@ npm-debug.log*
 
 # Local tooling artifacts (not part of the app)
 *.db
+*.rvf
+*.rvf.lock
 .claude/
 .remember/
 
@@ -30,6 +32,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Éditeurs
+# Editors
 .idea/
 *.swp
