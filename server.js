@@ -59,7 +59,7 @@ function hostnameOf(hostHeader) {
 
 app.use((req, res, next) => {
   if (!ALLOWED_HOSTS.has(hostnameOf(req.headers.host))) {
-    return res.status(403).json({ error: 'Forbidden: accès local uniquement' });
+    return res.status(403).json({ error: t('error.forbidden') });
   }
   next();
 });
@@ -871,16 +871,16 @@ app.get('/api/scan-stream', (req, res) => {
 
 app.post('/api/launch', (req, res) => {
   const { projectId, commandKey } = req.body;
-  if (!projectId || !commandKey) return res.status(400).json({ error: 'projectId et commandKey requis' });
+  if (!projectId || !commandKey) return res.status(400).json({ error: t('error.projectIdAndCommandKeyRequired') });
 
   const instanceId = `${projectId}__${commandKey}`;
-  if (instances.has(instanceId)) return res.status(409).json({ error: 'Déjà en cours', instanceId });
+  if (instances.has(instanceId)) return res.status(409).json({ error: t('error.alreadyRunning'), instanceId });
 
   const project = registry.find(p => p.id === projectId);
-  if (!project) return res.status(404).json({ error: 'Projet introuvable' });
+  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
 
   const cmdConfig = project.commands[commandKey];
-  if (!cmdConfig) return res.status(404).json({ error: 'Commande introuvable' });
+  if (!cmdConfig) return res.status(404).json({ error: t('error.commandNotFound') });
 
   const cwd = cmdConfig.cwd ? path.resolve(project.path, cmdConfig.cwd) : project.path;
 
@@ -916,7 +916,7 @@ app.post('/api/launch', (req, res) => {
 
 app.post('/api/stop', (req, res) => {
   const instance = instances.get(req.body.instanceId);
-  if (!instance) return res.status(404).json({ error: 'Instance introuvable' });
+  if (!instance) return res.status(404).json({ error: t('error.instanceNotFound') });
   instance.process.kill('SIGTERM');
   setTimeout(() => { if (instances.has(req.body.instanceId)) instance.process.kill('SIGKILL'); }, 3000);
   res.json({ ok: true });
@@ -938,7 +938,7 @@ app.get('/api/logs/:instanceId', (req, res) => {
 app.post('/api/open-folder', (req, res) => {
   const { projectId } = req.body;
   const project = registry.find(p => p.id === projectId);
-  if (!project) return res.status(404).json({ error: 'Projet introuvable' });
+  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
 
   const platform = process.platform;
   const cmd  = platform === 'win32'  ? 'explorer'  :
@@ -953,11 +953,11 @@ app.post('/api/open-folder', (req, res) => {
 app.post('/api/open-editor', (req, res) => {
   const { projectId, ideId } = req.body;
   const project = registry.find(p => p.id === projectId);
-  if (!project) return res.status(404).json({ error: 'Projet introuvable' });
+  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
 
   const resolvedId = ideId || project.ideId || settings.defaultIde;
   const ide = settings.ides?.find(i => i.id === resolvedId) || settings.ides?.[0];
-  if (!ide) return res.status(400).json({ error: 'Aucun éditeur configuré' });
+  if (!ide) return res.status(400).json({ error: t('error.noEditorConfigured') });
 
   const exec = resolveIdeExec(ide);
   const proc = spawn(exec, [project.path], { shell: true, detached: true, stdio: 'ignore' });
@@ -971,7 +971,7 @@ app.post('/api/open-editor', (req, res) => {
 app.patch('/api/projects/:id/ide', (req, res) => {
   const { ideId } = req.body;
   const project = registry.find(p => p.id === req.params.id);
-  if (!project) return res.status(404).json({ error: 'Projet introuvable' });
+  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
   if (ideId) project.ideId = ideId;
   else delete project.ideId;
   fs.writeFileSync(PROJECTS_FILE, JSON.stringify(registry, null, 2));
@@ -986,11 +986,11 @@ app.get('/api/categories', (req, res) => res.json(categoriesData));
 // Créer ou modifier une catégorie
 app.post('/api/categories', (req, res) => {
   const { id, name, color } = req.body;
-  if (!name?.trim()) return res.status(400).json({ error: 'name requis' });
+  if (!name?.trim()) return res.status(400).json({ error: t('error.nameRequired') });
   if (id) {
     // Mise à jour
     const cat = categoriesData.categories.find(c => c.id === id);
-    if (!cat) return res.status(404).json({ error: 'Catégorie introuvable' });
+    if (!cat) return res.status(404).json({ error: t('error.categoryNotFound') });
     cat.name  = name.trim();
     cat.color = color || cat.color;
   } else {
@@ -1018,7 +1018,7 @@ app.delete('/api/categories/:id', (req, res) => {
 // Assigner / désassigner une catégorie à un projet
 app.post('/api/categories/assign', (req, res) => {
   const { projectId, categoryId, action } = req.body; // action: 'add' | 'remove'
-  if (!projectId || !categoryId) return res.status(400).json({ error: 'projectId et categoryId requis' });
+  if (!projectId || !categoryId) return res.status(400).json({ error: t('error.projectIdAndCategoryIdRequired') });
   const current = categoriesData.assignments[projectId] || [];
   if (action === 'add' && !current.includes(categoryId)) {
     categoriesData.assignments[projectId] = [...current, categoryId];
@@ -1035,20 +1035,20 @@ app.post('/api/categories/assign', (req, res) => {
 // Détecter les propriétés d'un chemin (sans l'importer)
 app.post('/api/projects/detect', (req, res) => {
   let dirPath = (req.body.path || '').trim();
-  if (!dirPath) return res.status(400).json({ error: 'path requis' });
+  if (!dirPath) return res.status(400).json({ error: t('error.pathRequired') });
 
   // Expand ~
   dirPath = dirPath.replace(/^~/, os.homedir());
 
-  if (!fs.existsSync(dirPath)) return res.status(404).json({ error: 'Dossier introuvable' });
-  if (!fs.statSync(dirPath).isDirectory()) return res.status(400).json({ error: 'Ce chemin n\'est pas un dossier' });
+  if (!fs.existsSync(dirPath)) return res.status(404).json({ error: t('error.folderNotFound') });
+  if (!fs.statSync(dirPath).isDirectory()) return res.status(400).json({ error: t('error.notADirectory') });
 
   const id = Buffer.from(dirPath).toString('base64url');
   const alreadyImported = registry.some(r => r.id === id || r.path === dirPath);
 
   let entries;
   try { entries = fs.readdirSync(dirPath, { withFileTypes: true }); }
-  catch (e) { return res.status(400).json({ error: `Impossible de lire : ${e.message}` }); }
+  catch (e) { return res.status(400).json({ error: t('error.cannotRead', undefined, { msg: e.message }) }); }
 
   // .launcher.yml priorité absolue
   const cfgPath = path.join(dirPath, config.configFile);
@@ -1085,13 +1085,13 @@ app.post('/api/projects/detect', (req, res) => {
 // Importer un projet dans le registre
 app.post('/api/projects', (req, res) => {
   let { path: dirPath, name, description, components, type, color, commands, source } = req.body;
-  if (!dirPath || !name?.trim()) return res.status(400).json({ error: 'path et name requis' });
+  if (!dirPath || !name?.trim()) return res.status(400).json({ error: t('error.pathAndNameRequired') });
 
   dirPath = dirPath.replace(/^~/, os.homedir());
   const id = Buffer.from(dirPath).toString('base64url');
 
   const existing = registry.find(p => p.id === id || p.path === dirPath);
-  if (existing) return res.status(409).json({ error: 'Ce projet est déjà importé', project: existing });
+  if (existing) return res.status(409).json({ error: t('error.projectAlreadyImported'), project: existing });
 
   const newProject = {
     id,
@@ -1115,7 +1115,7 @@ app.post('/api/projects', (req, res) => {
 app.put('/api/projects/:id', (req, res) => {
   const { id } = req.params;
   const idx = registry.findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Projet introuvable' });
+  if (idx === -1) return res.status(404).json({ error: t('error.projectNotFound') });
 
   const { name, description, components, type, color, commands } = req.body;
   const updated = {
@@ -1138,7 +1138,7 @@ app.put('/api/projects/:id', (req, res) => {
 app.delete('/api/projects/:id', (req, res) => {
   const { id } = req.params;
   const idx = registry.findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Projet introuvable' });
+  if (idx === -1) return res.status(404).json({ error: t('error.projectNotFound') });
 
   registry.splice(idx, 1);
   saveRegistry();
@@ -1195,18 +1195,18 @@ app.post('/api/settings', (req, res) => {
       // Expand ~ si nécessaire
       incoming.devRoot = incoming.devRoot.replace(/^~/, os.homedir());
       if (!path.isAbsolute(incoming.devRoot)) {
-        return res.status(400).json({ error: 'devRoot doit être un chemin absolu' });
+        return res.status(400).json({ error: t('error.devRootMustBeAbsolute') });
       }
     }
     if (incoming.scanDepth !== undefined) {
       incoming.scanDepth = Math.max(1, Math.min(10, parseInt(incoming.scanDepth, 10)));
-      if (isNaN(incoming.scanDepth)) return res.status(400).json({ error: 'scanDepth invalide' });
+      if (isNaN(incoming.scanDepth)) return res.status(400).json({ error: t('error.scanDepthInvalid') });
     }
     if (incoming.ignoreDirs !== undefined && !Array.isArray(incoming.ignoreDirs)) {
-      return res.status(400).json({ error: 'ignoreDirs doit être un tableau' });
+      return res.status(400).json({ error: t('error.ignoreDirsMustBeArray') });
     }
     if (incoming.lang !== undefined && incoming.lang !== null && !catalogs[incoming.lang]) {
-      return res.status(400).json({ error: 'Unknown language code' });
+      return res.status(400).json({ error: t('error.unknownLanguageCode') });
     }
 
     settings = { ...settings, ...saveSettings({ ...settings, ...incoming }) };
@@ -1219,7 +1219,7 @@ app.post('/api/settings', (req, res) => {
 // Vérifier si un port est occupé
 app.get('/api/port-check/:port', (req, res) => {
   const port = parseInt(req.params.port, 10);
-  if (!port || port < 1 || port > 65535) return res.status(400).json({ error: 'Invalid port' });
+  if (!port || port < 1 || port > 65535) return res.status(400).json({ error: t('error.invalidPort') });
   const net = require('net');
   const tester = net.createConnection({ port, host: '127.0.0.1' });
   tester.once('connect', () => { tester.destroy(); res.json({ inUse: true, port }); });
