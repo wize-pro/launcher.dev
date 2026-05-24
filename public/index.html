@@ -58,7 +58,7 @@ html[data-theme="light"] .cat-popover,
 html[data-theme="light"] .cat-color-picker{box-shadow:0 4px 16px rgba(0,0,0,.12)}
 html[data-theme="light"] .has-running .sdot{box-shadow:0 0 5px rgba(22,163,74,.5)}
 
-/* Icônes thème — montrer lune en dark, soleil en light */
+/* Theme icons — show moon in dark mode, sun in light mode */
 .theme-icon-moon{display:block}
 .theme-icon-sun{display:none}
 html[data-theme="light"] .theme-icon-moon{display:none}
@@ -283,7 +283,7 @@ header{
   flex-shrink:0;overflow-x:auto;
 }
 .filter-bar::-webkit-scrollbar{height:0}
-/* Les boutons dans #tag-pills doivent être des flex-items directs */
+/* Buttons inside #tag-pills must be direct flex items */
 #tag-pills{display:contents}
 
 .fp{
@@ -350,9 +350,9 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
   display:grid;
   grid-template-columns:
     32px               /* col-icon : sdot + type */
-    minmax(0,210px)    /* col-name : nom + git + badge */
-    minmax(0,1fr)      /* col-path : chemin */
-    82px               /* col-date : date activité */
+    minmax(0,210px)    /* col-name : name + git + badge */
+    minmax(0,1fr)      /* col-path : path */
+    82px               /* col-date : activity date */
     auto;              /* col-actions : boutons */
   align-items:center;
   column-gap:10px;
@@ -360,11 +360,11 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
   cursor:default;
 }
 
-/* Ligne 2 : éléments variables (tags, catégories) */
+/* Row 2: variable elements (tags, categories) */
 .prow-meta{
   display:flex;align-items:center;gap:5px;
   flex-wrap:wrap;
-  /* aligne sous col-name : padding-main(16) + col-icon(32) + gap(10) = 58px */
+  /* align under col-name: padding-main(16) + col-icon(32) + gap(10) = 58px */
   padding:2px 12px 8px 58px;
 }
 
@@ -474,7 +474,7 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
 .cbtn.folder-btn:hover{color:#fbbf24;background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2)}
 .cbtn.vscode-btn:hover{color:#4fc3f7;background:rgba(79,195,247,.08);border-color:rgba(79,195,247,.2)}
 
-/* Bouton éditeur dynamique */
+/* Dynamic editor button */
 .editor-btn-wrap{display:inline-flex;opacity:0;transition:opacity .15s}
 .prow:hover .editor-btn-wrap{opacity:1}
 .cbtn.editor-btn{gap:5px;border-radius:5px 0 0 5px;border-right:none}
@@ -482,7 +482,7 @@ main{flex:1;overflow-y:auto;padding:12px 16px;min-height:0}
 .cbtn.editor-chevron{padding:4px 6px;border-radius:0 5px 5px 0;color:var(--t3);font-size:10px}
 .cbtn.editor-chevron:hover{color:var(--tx);background:var(--s3)}
 
-/* Popover sélecteur IDE */
+/* IDE selector popover */
 .ide-picker{
   position:fixed;z-index:400;
   background:var(--s2);border:1px solid var(--bd2);
@@ -698,13 +698,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 .sort-btn:hover{background:var(--s3);color:var(--tx);border-color:var(--bd)}
 .sort-btn.active{color:var(--tx);font-weight:600}
 .sort-arrow{font-size:10px}
-/* col-date : activité */
+/* col-date: activity */
 .col-date{
   font-size:10px;color:var(--t3);font-family:var(--mono);
   white-space:nowrap;text-align:right;
 }
 .col-date.recent{color:var(--gn);opacity:.8}
-/* catégories (dans prow-meta) */
+/* categories (inside prow-meta) */
 .col-cats{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 /* Port link */
 .port-wrap{display:inline-flex;align-items:center;gap:3px}
@@ -1211,7 +1211,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 .system{color:var(--t3);font-style:italic}
 </style>
 <script>
-  /* Applique le thème sauvegardé avant le premier rendu pour éviter le flash */
+  /* Apply saved theme before first render to avoid flash */
   if(localStorage.getItem('dlTheme')==='light')
     document.documentElement.setAttribute('data-theme','light');
 </script>
@@ -1682,7 +1682,7 @@ async function loadFavorites() {
   } catch { favorites = new Set(); }
 }
 
-// ══ Thème ══════════════════════════════════════════════════════════════════
+// ══ Theme ══════════════════════════════════════════════════════════════════
 let currentTheme = localStorage.getItem('dlTheme') || 'dark';
 function applyTheme(theme) {
   currentTheme = theme;
@@ -1802,17 +1802,17 @@ function applySort(list) {
 // ══ Favorites ══════════════════════════════════════════════════════════════
 async function toggleFavorite(id) {
   const wasFav = favorites.has(id);
-  // Mise à jour optimiste immédiate
+  // Immediate optimistic update
   wasFav ? favorites.delete(id) : favorites.add(id);
   renderFilter();
   renderProjects();
-  // Persistance côté serveur (partagée entre web et Electron)
+  // Server-side persistence (shared between web and Electron)
   try {
     await fetch(`/api/favorites/${encodeURIComponent(id)}`, {
       method: wasFav ? 'DELETE' : 'POST',
     });
   } catch {
-    // En cas d'erreur réseau, on annule l'update optimiste
+    // On network error, roll back the optimistic update
     wasFav ? favorites.add(id) : favorites.delete(id);
     renderFilter();
     renderProjects();
@@ -1977,7 +1977,7 @@ const COMPONENT_PICKER_ORDER = [
 ];
 
 function detectProjectType(p) {
-  // Priorité 1 : type manuel sauvegardé
+  // Priority 1: manually saved type
   if (p.type) return p.type;
   if (p.typeOverride) return p.typeOverride;
 
@@ -2052,12 +2052,12 @@ function detectProjectType(p) {
   return 'unknown';
 }
 
-// Retourne les types compatibles/recommandés/déconseillés pour un projet
+// Returns compatible/recommended/discouraged types for a project
 function computeCompatibleTypes(p) {
   const comps = new Set(p.components || p.tags || []);
   const autoDetected = detectProjectType({ ...p, type: null, typeOverride: null });
 
-  // Types recommandés selon le stack technique
+  // Recommended types based on the tech stack
   const recommended = new Set([autoDetected]);
 
   if (comps.has('electron') || comps.has('tauri'))               recommended.add('desktop');
@@ -2085,13 +2085,13 @@ function computeCompatibleTypes(p) {
   if (comps.has('make')) {
     recommended.add('script'); recommended.add('cli');
   }
-  // Si aucun composant tech connu → tout est possible
+  // If no known tech component → everything is possible
   const knownTech = ['node','dotnet','python','go','rust','docker','make','electron','tauri','react-native','expo','flutter'];
   if (!knownTech.some(t => comps.has(t))) {
     Object.keys(PROJECT_TYPES).forEach(t => recommended.add(t));
   }
 
-  // Les types non recommandés sont "déconseillés"
+  // Types not in recommended are "discouraged"
   const all = Object.keys(PROJECT_TYPES).filter(t => t !== 'unknown');
   const discouraged = all.filter(t => !recommended.has(t));
 
@@ -2384,13 +2384,13 @@ function rowHtml(p) {
       ${badge}
     </div>
 
-    <!-- col 3 : chemin -->
+    <!-- col 3: path -->
     <span class="col-path" title="${p.path}">${shortPath}</span>
 
-    <!-- col 4 : date activité -->
+    <!-- col 4: activity date -->
     <span class="col-date ${act?.recent?'recent':''}"${dateTip}>${act?act.label:''}</span>
 
-    <!-- col 5 : boutons -->
+    <!-- col 5: buttons -->
     <div class="prow-actions" id="actions-${p.id}">
       ${inlineActions}
       <button class="cbtn fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFavorite('${p.id}')" title="${isFav?t('card.favRemove'):t('card.favAdd')}">
@@ -2410,7 +2410,7 @@ function rowHtml(p) {
 
   </div>
 
-  <!-- ligne 2 : tags + catégories (toujours présente pour le bouton +) -->
+  <!-- row 2: tags + categories (always present for the + button) -->
   <div class="prow-meta">
     ${tags ? `<div class="prow-tags">${tags}</div>` : ''}
     ${catsHtml}
@@ -2765,7 +2765,7 @@ function importAllFromScan() {
   const newProjects = lastScanResults.filter(p => !p.imported);
   if (!newProjects.length) return;
   closeScan();
-  // Ouvrir le premier projet à importer (les autres suivront manuellement)
+  // Open the first project to import (the rest will be handled manually)
   openImportPanel({ mode: 'new', prefill: newProjects[0] });
 }
 
@@ -3206,7 +3206,7 @@ async function pickFolderInto(inputId) {
     const url = '/api/pick-folder' + (current ? '?current=' + encodeURIComponent(current) : '');
     const r = await fetch(url);
     if (!r.ok) {
-      // Mode web : le sélecteur natif n'est pas disponible, on laisse l'utilisateur taper
+      // Web mode: the native picker is not available, let the user type manually
       return;
     }
     const data = await r.json();
@@ -3214,7 +3214,7 @@ async function pickFolderInto(inputId) {
       input.value = data.path;
       input.dispatchEvent(new Event('input'));
     }
-  } catch { /* silencieux */ }
+  } catch { /* silent */ }
 }
 
 // ══ IDE Settings ══════════════════════════════════════════════════════════
@@ -3385,16 +3385,16 @@ function fillImportForm(data) {
   document.getElementById('import-description').value = data.description || '';
   importState.selectedColor = data.color || IMPORT_COLORS[0];
 
-  // Composants
+  // Components
   const initialComps = data.components || data.tags || [];
   importState.selectedComponents = new Set(initialComps);
 
-  // Catégories initiales (pour détecter les changements en mode édition)
+  // Initial categories (to detect changes in edit mode)
   const pid = importState.projectId;
   importState.originalCategoryIds = new Set(pid ? (catAssignments[pid] || []) : []);
   importState.pendingCatIds = new Set(importState.originalCategoryIds);
 
-  // Type : calculer les types compatibles et initialiser la sélection
+  // Type: compute compatible types and initialize selection
   importState.compatInfo       = computeCompatibleTypes({ ...data, components: initialComps });
   importState.autoDetectedType = importState.compatInfo.autoDetected;
   importState.selectedType     = data.type || data.typeOverride || importState.compatInfo.autoDetected;
@@ -3503,10 +3503,10 @@ function getImportFormData() {
   const desc  = document.getElementById('import-description').value.trim();
   const color = importState.selectedColor || IMPORT_COLORS[0];
 
-  // Composants sélectionnés
+  // Selected components
   const components = [...importState.selectedComponents];
 
-  // Type : sauvegarder seulement si différent de l'auto-détecté
+  // Type: save only if different from the auto-detected one
   const type = (importState.selectedType && importState.selectedType !== importState.autoDetectedType)
     ? importState.selectedType
     : null;
@@ -3776,7 +3776,7 @@ async function deleteProject(projectId, projectName, event) {
   } catch(e) { alert(e.message); }
 }
 
-// ══ Sync temps réel (SSE) ══════════════════════════════════════════════════
+// ══ Real-time sync (SSE) ══════════════════════════════════════════════════
 function connectEvents() {
   const es = new EventSource('/api/events');
 
@@ -3840,9 +3840,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Fermer le popover de catégories
+// Close the categories popover
 document.addEventListener('click', e => {
-  // Fermer le popover de catégories
+  // Close the categories popover
   const pop = document.getElementById('cat-popover');
   if (pop?.classList.contains('open') && !pop.contains(e.target) && !e.target.closest('.cat-assign-btn')) {
     closeCatPopover();
