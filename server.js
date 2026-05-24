@@ -13,7 +13,6 @@ const gitLib = require('./lib/git.js');
 const scanner = require('./lib/scanner.js');
 const registryLib  = require('./lib/registry.js');
 const categoriesLib = require('./lib/categories.js');
-const favoritesLib  = require('./lib/favorites.js');
 const settingsLib = require('./lib/settings.js');
 const { SETTINGS_DEFAULTS, CURRENT_SCHEMA_VERSION } = settingsLib;
 const { normalizeProject } = registryLib;
@@ -563,27 +562,7 @@ app.get('/api/events', (req, res) => {
   req.on('close', () => { ctx.store.broadcastClients.delete(res); clearInterval(hb); });
 });
 
-// ─── Favorites ───────────────────────────────────────────────────────────────
-
-app.get('/api/favorites', (req, res) => {
-  res.json([...favoritesLib.loadFavorites(ctx.paths.FAVORITES_FILE)]);
-});
-
-app.post('/api/favorites/:id', (req, res) => {
-  const favs = favoritesLib.loadFavorites(ctx.paths.FAVORITES_FILE);
-  favs.add(req.params.id);
-  favoritesLib.saveFavorites(ctx.paths.FAVORITES_FILE, favs);
-  ctx.broadcast('favorites-changed', [...favs]);
-  res.json({ ok: true });
-});
-
-app.delete('/api/favorites/:id', (req, res) => {
-  const favs = favoritesLib.loadFavorites(ctx.paths.FAVORITES_FILE);
-  favs.delete(req.params.id);
-  favoritesLib.saveFavorites(ctx.paths.FAVORITES_FILE, favs);
-  ctx.broadcast('favorites-changed', [...favs]);
-  res.json({ ok: true });
-});
+app.use(require('./routes/favorites.js')(ctx));
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 
