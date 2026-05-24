@@ -1,5 +1,7 @@
 # Roadmap
 
+<!-- AUTO-GENERATED from GitHub issues + milestones by scripts/gen-roadmap.mjs. Do not edit by hand. -->
+
 This roadmap is generated from the repository's GitHub issues and milestones.
 Live board: <https://github.com/users/wize-pro/projects/1>
 

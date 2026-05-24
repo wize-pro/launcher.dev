@@ -1,0 +1,40 @@
+name: Roadmap
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, deleted, labeled, unlabeled, milestoned, demilestoned]
+  milestone:
+    types: [created, edited, deleted, opened, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: roadmap
+  cancel-in-progress: false
+
+jobs:
+  update-roadmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Generate ROADMAP.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/gen-roadmap.mjs
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- ROADMAP.md; then
+            echo "ROADMAP.md unchanged — nothing to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add ROADMAP.md
+            git commit -m "docs: auto-update ROADMAP.md [skip ci]"
+            git push
+          fi
