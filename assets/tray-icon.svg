@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="192 176 640 640">
+  <!-- macOS template image: black shapes on transparent; the window is a punched hole -->
+  <mask id="win">
+    <rect x="192" y="176" width="640" height="640" fill="white"/>
+    <circle cx="512" cy="432" r="64" fill="black"/>
+  </mask>
+  <g fill="#000000" mask="url(#win)">
+    <!-- body + nose -->
+    <path d="M512 224
+             C 602 318, 636 454, 636 566
+             L 636 636
+             L 388 636
+             L 388 566
+             C 388 454, 422 318, 512 224 Z"/>
+    <!-- left fin -->
+    <path d="M388 560 L 292 706 L 388 664 Z"/>
+    <!-- right fin -->
+    <path d="M636 560 L 732 706 L 636 664 Z"/>
+    <!-- exhaust flame -->
+    <path d="M454 636 L 570 636 L 540 724 Q 512 768 484 724 Z"/>
+  </g>
+</svg>
