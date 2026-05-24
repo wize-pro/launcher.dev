@@ -7,13 +7,16 @@ const { spawn, spawnSync } = require('child_process');
 const config = require('./launcher.config');
 const pkg = require('./package.json');
 const i18n = require('./public/i18n.js');
-const { loadCatalogs } = require('./lib/i18n.js');
+const { loadCatalogs, makeT } = require('./lib/i18n.js');
 const { resolveIdeExec } = require('./lib/ides.js');
 const gitLib = require('./lib/git.js');
 const scanner = require('./lib/scanner.js');
 const registryLib  = require('./lib/registry.js');
 const categoriesLib = require('./lib/categories.js');
 const favoritesLib  = require('./lib/favorites.js');
+const settingsLib = require('./lib/settings.js');
+const { SETTINGS_DEFAULTS, CURRENT_SCHEMA_VERSION } = settingsLib;
+const { normalizeProject } = registryLib;
 
 // Where to persist user data (projects.json, settings.json, …). In a PACKAGED
 // Electron build the source directory is read-only (inside the app bundle/asar),
@@ -28,17 +31,50 @@ if (process.versions.electron) {
   } catch {}
 }
 
-// ─── Locale catalogs ───────────────────────────────────────────────────────────
-const LOCALES_DIR = path.join(__dirname, 'locales');
+// ─── File paths ───────────────────────────────────────────────────────────────
+const SETTINGS_FILE   = path.join(DATA_DIR, 'settings.json');
+const PROJECTS_FILE   = path.join(DATA_DIR, 'projects.json');
+const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
+const FAVORITES_FILE  = path.join(DATA_DIR, 'favorites.json');
+const LOCALES_DIR     = path.join(__dirname, 'locales');
 
-let catalogs = loadCatalogs(LOCALES_DIR);
+// ─── Assembled context ────────────────────────────────────────────────────────
 
-// Translate a key using the given language (defaults to the active settings language).
-// NOTE: relies on the module-level `settings` (declared later); must not be called during
-// module initialization, only from request handlers. Call sites are added in Phase 2.
-function t(key, lang, params) {
-  return i18n.translate(catalogs, lang || settings.lang || 'en', key, params);
+const store = {
+  settings:         settingsLib.loadSettings(SETTINGS_FILE),
+  registry:         registryLib.loadRegistry(PROJECTS_FILE),
+  categories:       categoriesLib.loadCategories(CATEGORIES_FILE),
+  catalogs:         loadCatalogs(LOCALES_DIR),
+  instances:        new Map(),
+  broadcastClients: new Set(),
+};
+
+const t = makeT(store);
+function broadcast(event, data) {
+  const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  store.broadcastClients.forEach(c => c.write(msg));
 }
+
+const ctx = {
+  config, pkg,
+  paths: { SETTINGS_FILE, PROJECTS_FILE, CATEGORIES_FILE, FAVORITES_FILE, LOCALES_DIR },
+  store,
+  SETTINGS_DEFAULTS, CURRENT_SCHEMA_VERSION,
+  t, broadcast,
+  scanProjects: (push) => scanner.scanProjects(push, { settings: store.settings, t }),
+  detectGit: gitLib.detectGit,
+  getLastActivity: (dir, hasGit) => gitLib.getLastActivity(dir, hasGit, { ignoreDirs: store.settings.ignoreDirs }),
+  resolveIdeExec,
+  saveSettings: (data) => settingsLib.saveSettings(SETTINGS_FILE, data),
+  reloadSettings: () => { store.settings = settingsLib.loadSettings(SETTINGS_FILE); return store.settings; },
+  saveRegistry: () => registryLib.saveRegistry(PROJECTS_FILE, store.registry),
+  saveCategories: () => categoriesLib.saveCategories(CATEGORIES_FILE, store.categories),
+  normalizeProject,
+};
+
+settingsLib.runMigrations(ctx);
+
+// ─── Express app ──────────────────────────────────────────────────────────────
 
 const app = express();
 app.use(express.json());
@@ -60,7 +96,7 @@ function hostnameOf(hostHeader) {
 
 app.use((req, res, next) => {
   if (!ALLOWED_HOSTS.has(hostnameOf(req.headers.host))) {
-    return res.status(403).json({ error: t('error.forbidden') });
+    return res.status(403).json({ error: ctx.t('error.forbidden') });
   }
   next();
 });
@@ -68,71 +104,29 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/locales', express.static(LOCALES_DIR));
 
-// ─── Settings (persisted in settings.json) ────────────────────────────────────
-
-const settingsLib = require('./lib/settings.js');
-const { SETTINGS_DEFAULTS, CURRENT_SCHEMA_VERSION } = settingsLib;
-
-const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
-
-// Active settings (mutable at runtime)
-let settings = settingsLib.loadSettings(SETTINGS_FILE);
-const saveSettings = (data) => settingsLib.saveSettings(SETTINGS_FILE, data);
-
-// ─── Categories (persisted in categories.json) ────────────────────────────────
-
-const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
-
-let categoriesData = categoriesLib.loadCategories(CATEGORIES_FILE);
-const persistCategories = () => categoriesLib.saveCategories(CATEGORIES_FILE, categoriesData);
-
-// ─── Project Registry (source of truth) ──────────────────────────────────────
-
-const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json');
-const normalizeProject = registryLib.normalizeProject;
-let registry = registryLib.loadRegistry(PROJECTS_FILE);
-const saveRegistry = () => registryLib.saveRegistry(PROJECTS_FILE, registry);
-
-// ─── Data schema & migrations ─────────────────────────────────────────────────
-
-const migrationCtx = {
-  paths: { SETTINGS_FILE, PROJECTS_FILE },
-  store: {
-    get settings(){ return settings; }, set settings(v){ settings = v; },
-    get registry(){ return registry; }, set registry(v){ registry = v; },
-  },
-  saveSettings: (d) => settingsLib.saveSettings(SETTINGS_FILE, d),
-  saveRegistry,
-};
-settingsLib.runMigrations(migrationCtx);
-
-// ─── State ────────────────────────────────────────────────────────────────────
-
-const instances = new Map();
-
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 app.get('/api/projects', (req, res) => {
   try {
-    const enriched = registry.map(p => {
-      const git = gitLib.detectGit(p.path);
-      const activity = gitLib.getLastActivity(p.path, git.hasGit, { ignoreDirs: settings.ignoreDirs });
-      const assignedCatIds = categoriesData.assignments[p.id] || [];
+    const enriched = ctx.store.registry.map(p => {
+      const git = ctx.detectGit(p.path);
+      const activity = ctx.getLastActivity(p.path, git.hasGit);
+      const assignedCatIds = ctx.store.categories.assignments[p.id] || [];
       const categories = assignedCatIds
-        .map(cid => categoriesData.categories.find(c => c.id === cid))
+        .map(cid => ctx.store.categories.categories.find(c => c.id === cid))
         .filter(Boolean);
 
       // Canonical schema is guaranteed by the startup migration; normalizeProject
       // is still applied here as a safety net (idempotent) in case an un-migrated
       // entry was added in the meantime.
-      const np = normalizeProject(p);
+      const np = ctx.normalizeProject(p);
 
       return {
         ...np,
         git,
         lastActivity: activity,
         categories,
-        runningCommands: [...instances.keys()]
+        runningCommands: [...ctx.store.instances.keys()]
           .filter(k => k.startsWith(p.id + '__'))
           .map(k => k.replace(p.id + '__', '')),
       };
@@ -155,18 +149,18 @@ app.get('/api/scan-stream', (req, res) => {
   };
 
   try {
-    const projects = scanner.scanProjects(send, { settings, t });
+    const projects = ctx.scanProjects(send);
     // Mark each project as imported or new
     const marked = projects.map(p => ({
       ...p,
-      imported: registry.some(r => r.id === p.id || r.path === p.path),
-      runningCommands: [...instances.keys()]
+      imported: ctx.store.registry.some(r => r.id === p.id || r.path === p.path),
+      runningCommands: [...ctx.store.instances.keys()]
         .filter(k => k.startsWith(p.id + '__'))
         .map(k => k.replace(p.id + '__', '')),
     }));
     res.write(`event: projects\ndata: ${JSON.stringify(marked)}\n\n`);
   } catch (e) {
-    send('warn', t('scan.log.unexpectedError', undefined, { msg: e.message }));
+    send('warn', ctx.t('scan.log.unexpectedError', undefined, { msg: e.message }));
   }
 
   res.end();
@@ -174,16 +168,16 @@ app.get('/api/scan-stream', (req, res) => {
 
 app.post('/api/launch', (req, res) => {
   const { projectId, commandKey } = req.body;
-  if (!projectId || !commandKey) return res.status(400).json({ error: t('error.projectIdAndCommandKeyRequired') });
+  if (!projectId || !commandKey) return res.status(400).json({ error: ctx.t('error.projectIdAndCommandKeyRequired') });
 
   const instanceId = `${projectId}__${commandKey}`;
-  if (instances.has(instanceId)) return res.status(409).json({ error: t('error.alreadyRunning'), instanceId });
+  if (ctx.store.instances.has(instanceId)) return res.status(409).json({ error: ctx.t('error.alreadyRunning'), instanceId });
 
-  const project = registry.find(p => p.id === projectId);
-  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
+  const project = ctx.store.registry.find(p => p.id === projectId);
+  if (!project) return res.status(404).json({ error: ctx.t('error.projectNotFound') });
 
   const cmdConfig = project.commands[commandKey];
-  if (!cmdConfig) return res.status(404).json({ error: t('error.commandNotFound') });
+  if (!cmdConfig) return res.status(404).json({ error: ctx.t('error.commandNotFound') });
 
   const cwd = cmdConfig.cwd ? path.resolve(project.path, cmdConfig.cwd) : project.path;
 
@@ -196,7 +190,7 @@ app.post('/api/launch', (req, res) => {
   });
 
   const instance = { process: proc, projectId, commandKey, startedAt: new Date().toISOString(), logs: [], sseClients: [] };
-  instances.set(instanceId, instance);
+  ctx.store.instances.set(instanceId, instance);
 
   const pushLog = (type, data) => {
     const line = { type, data: data.toString(), ts: Date.now() };
@@ -208,25 +202,25 @@ app.post('/api/launch', (req, res) => {
   proc.stdout.on('data', d => pushLog('stdout', d));
   proc.stderr.on('data', d => pushLog('stderr', d));
   proc.on('exit', code => {
-    pushLog('system', `\n${t('launch.log.processExited', undefined, { code: code ?? 'signal' })}\n`);
-    instances.delete(instanceId);
+    pushLog('system', `\n${ctx.t('launch.log.processExited', undefined, { code: code ?? 'signal' })}\n`);
+    ctx.store.instances.delete(instanceId);
     instance.sseClients.forEach(c => { c.write(`event: exit\ndata: ${JSON.stringify({ code })}\n\n`); c.end(); });
   });
-  proc.on('error', err => pushLog('system', `${t('launch.log.processError', undefined, { msg: err.message })}\n`));
+  proc.on('error', err => pushLog('system', `${ctx.t('launch.log.processError', undefined, { msg: err.message })}\n`));
 
   res.json({ instanceId, pid: proc.pid });
 });
 
 app.post('/api/stop', (req, res) => {
-  const instance = instances.get(req.body.instanceId);
-  if (!instance) return res.status(404).json({ error: t('error.instanceNotFound') });
+  const instance = ctx.store.instances.get(req.body.instanceId);
+  if (!instance) return res.status(404).json({ error: ctx.t('error.instanceNotFound') });
   instance.process.kill('SIGTERM');
-  setTimeout(() => { if (instances.has(req.body.instanceId)) instance.process.kill('SIGKILL'); }, 3000);
+  setTimeout(() => { if (ctx.store.instances.has(req.body.instanceId)) instance.process.kill('SIGKILL'); }, 3000);
   res.json({ ok: true });
 });
 
 app.get('/api/logs/:instanceId', (req, res) => {
-  const instance = instances.get(req.params.instanceId);
+  const instance = ctx.store.instances.get(req.params.instanceId);
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -240,8 +234,8 @@ app.get('/api/logs/:instanceId', (req, res) => {
 // Open the folder in the file explorer (cross-platform)
 app.post('/api/open-folder', (req, res) => {
   const { projectId } = req.body;
-  const project = registry.find(p => p.id === projectId);
-  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
+  const project = ctx.store.registry.find(p => p.id === projectId);
+  if (!project) return res.status(404).json({ error: ctx.t('error.projectNotFound') });
 
   const platform = process.platform;
   const cmd  = platform === 'win32'  ? 'explorer'  :
@@ -255,14 +249,14 @@ app.post('/api/open-folder', (req, res) => {
 // Open a project in the editor
 app.post('/api/open-editor', (req, res) => {
   const { projectId, ideId } = req.body;
-  const project = registry.find(p => p.id === projectId);
-  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
+  const project = ctx.store.registry.find(p => p.id === projectId);
+  if (!project) return res.status(404).json({ error: ctx.t('error.projectNotFound') });
 
-  const resolvedId = ideId || project.ideId || settings.defaultIde;
-  const ide = settings.ides?.find(i => i.id === resolvedId) || settings.ides?.[0];
-  if (!ide) return res.status(400).json({ error: t('error.noEditorConfigured') });
+  const resolvedId = ideId || project.ideId || ctx.store.settings.defaultIde;
+  const ide = ctx.store.settings.ides?.find(i => i.id === resolvedId) || ctx.store.settings.ides?.[0];
+  if (!ide) return res.status(400).json({ error: ctx.t('error.noEditorConfigured') });
 
-  const exec = resolveIdeExec(ide);
+  const exec = ctx.resolveIdeExec(ide);
   const proc = spawn(exec, [project.path], { shell: true, detached: true, stdio: 'ignore' });
   proc.unref();
 
@@ -273,64 +267,64 @@ app.post('/api/open-editor', (req, res) => {
 // Set the preferred IDE for a project
 app.patch('/api/projects/:id/ide', (req, res) => {
   const { ideId } = req.body;
-  const project = registry.find(p => p.id === req.params.id);
-  if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
+  const project = ctx.store.registry.find(p => p.id === req.params.id);
+  if (!project) return res.status(404).json({ error: ctx.t('error.projectNotFound') });
   if (ideId) project.ideId = ideId;
   else delete project.ideId;
-  saveRegistry();
-  broadcast('project-ide-changed', { id: project.id, ideId: project.ideId ?? null });
+  ctx.saveRegistry();
+  ctx.broadcast('project-ide-changed', { id: project.id, ideId: project.ideId ?? null });
   res.json({ ok: true });
 });
 
 // ─── Categories API ───────────────────────────────────────────────────────────
 
-app.get('/api/categories', (req, res) => res.json(categoriesData));
+app.get('/api/categories', (req, res) => res.json(ctx.store.categories));
 
 // Create or update a category
 app.post('/api/categories', (req, res) => {
   const { id, name, color } = req.body;
-  if (!name?.trim()) return res.status(400).json({ error: t('error.nameRequired') });
+  if (!name?.trim()) return res.status(400).json({ error: ctx.t('error.nameRequired') });
   if (id) {
     // Update
-    const cat = categoriesData.categories.find(c => c.id === id);
-    if (!cat) return res.status(404).json({ error: t('error.categoryNotFound') });
+    const cat = ctx.store.categories.categories.find(c => c.id === id);
+    if (!cat) return res.status(404).json({ error: ctx.t('error.categoryNotFound') });
     cat.name  = name.trim();
     cat.color = color || cat.color;
   } else {
     // Create
     const newCat = { id: `cat_${Date.now()}`, name: name.trim(), color: color || '#6366f1' };
-    categoriesData.categories.push(newCat);
+    ctx.store.categories.categories.push(newCat);
   }
-  persistCategories();
-  res.json(categoriesData);
+  ctx.saveCategories();
+  res.json(ctx.store.categories);
 });
 
 // Delete a category
 app.delete('/api/categories/:id', (req, res) => {
   const { id } = req.params;
-  categoriesData.categories = categoriesData.categories.filter(c => c.id !== id);
+  ctx.store.categories.categories = ctx.store.categories.categories.filter(c => c.id !== id);
   // Clean up assignments
-  for (const pid of Object.keys(categoriesData.assignments)) {
-    categoriesData.assignments[pid] = categoriesData.assignments[pid].filter(cid => cid !== id);
-    if (!categoriesData.assignments[pid].length) delete categoriesData.assignments[pid];
+  for (const pid of Object.keys(ctx.store.categories.assignments)) {
+    ctx.store.categories.assignments[pid] = ctx.store.categories.assignments[pid].filter(cid => cid !== id);
+    if (!ctx.store.categories.assignments[pid].length) delete ctx.store.categories.assignments[pid];
   }
-  persistCategories();
-  res.json(categoriesData);
+  ctx.saveCategories();
+  res.json(ctx.store.categories);
 });
 
 // Assign / unassign a category to a project
 app.post('/api/categories/assign', (req, res) => {
   const { projectId, categoryId, action } = req.body; // action: 'add' | 'remove'
-  if (!projectId || !categoryId) return res.status(400).json({ error: t('error.projectIdAndCategoryIdRequired') });
-  const current = categoriesData.assignments[projectId] || [];
+  if (!projectId || !categoryId) return res.status(400).json({ error: ctx.t('error.projectIdAndCategoryIdRequired') });
+  const current = ctx.store.categories.assignments[projectId] || [];
   if (action === 'add' && !current.includes(categoryId)) {
-    categoriesData.assignments[projectId] = [...current, categoryId];
+    ctx.store.categories.assignments[projectId] = [...current, categoryId];
   } else if (action === 'remove') {
-    categoriesData.assignments[projectId] = current.filter(id => id !== categoryId);
-    if (!categoriesData.assignments[projectId].length) delete categoriesData.assignments[projectId];
+    ctx.store.categories.assignments[projectId] = current.filter(id => id !== categoryId);
+    if (!ctx.store.categories.assignments[projectId].length) delete ctx.store.categories.assignments[projectId];
   }
-  persistCategories();
-  res.json(categoriesData.assignments[projectId] || []);
+  ctx.saveCategories();
+  res.json(ctx.store.categories.assignments[projectId] || []);
 });
 
 // ─── Registry API ─────────────────────────────────────────────────────────────
@@ -338,20 +332,20 @@ app.post('/api/categories/assign', (req, res) => {
 // Detect the properties of a path (without importing it)
 app.post('/api/projects/detect', (req, res) => {
   let dirPath = (req.body.path || '').trim();
-  if (!dirPath) return res.status(400).json({ error: t('error.pathRequired') });
+  if (!dirPath) return res.status(400).json({ error: ctx.t('error.pathRequired') });
 
   // Expand ~
   dirPath = dirPath.replace(/^~/, os.homedir());
 
-  if (!fs.existsSync(dirPath)) return res.status(404).json({ error: t('error.folderNotFound') });
-  if (!fs.statSync(dirPath).isDirectory()) return res.status(400).json({ error: t('error.notADirectory') });
+  if (!fs.existsSync(dirPath)) return res.status(404).json({ error: ctx.t('error.folderNotFound') });
+  if (!fs.statSync(dirPath).isDirectory()) return res.status(400).json({ error: ctx.t('error.notADirectory') });
 
   const id = Buffer.from(dirPath).toString('base64url');
-  const alreadyImported = registry.some(r => r.id === id || r.path === dirPath);
+  const alreadyImported = ctx.store.registry.some(r => r.id === id || r.path === dirPath);
 
   let entries;
   try { entries = fs.readdirSync(dirPath, { withFileTypes: true }); }
-  catch (e) { return res.status(400).json({ error: t('error.cannotRead', undefined, { msg: e.message }) }); }
+  catch (e) { return res.status(400).json({ error: ctx.t('error.cannotRead', undefined, { msg: e.message }) }); }
 
   // .launcher.yml absolute priority
   const cfgPath = path.join(dirPath, config.configFile);
@@ -388,13 +382,13 @@ app.post('/api/projects/detect', (req, res) => {
 // Import a project into the registry
 app.post('/api/projects', (req, res) => {
   let { path: dirPath, name, description, components, type, color, commands, source } = req.body;
-  if (!dirPath || !name?.trim()) return res.status(400).json({ error: t('error.pathAndNameRequired') });
+  if (!dirPath || !name?.trim()) return res.status(400).json({ error: ctx.t('error.pathAndNameRequired') });
 
   dirPath = dirPath.replace(/^~/, os.homedir());
   const id = Buffer.from(dirPath).toString('base64url');
 
-  const existing = registry.find(p => p.id === id || p.path === dirPath);
-  if (existing) return res.status(409).json({ error: t('error.projectAlreadyImported'), project: existing });
+  const existing = ctx.store.registry.find(p => p.id === id || p.path === dirPath);
+  if (existing) return res.status(409).json({ error: ctx.t('error.projectAlreadyImported'), project: existing });
 
   const newProject = {
     id,
@@ -409,52 +403,52 @@ app.post('/api/projects', (req, res) => {
     importedAt: Date.now(),
   };
 
-  registry.push(newProject);
-  saveRegistry();
+  ctx.store.registry.push(newProject);
+  ctx.saveRegistry();
   res.status(201).json(newProject);
 });
 
 // Update a project in the registry
 app.put('/api/projects/:id', (req, res) => {
   const { id } = req.params;
-  const idx = registry.findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: t('error.projectNotFound') });
+  const idx = ctx.store.registry.findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: ctx.t('error.projectNotFound') });
 
   const { name, description, components, type, color, commands } = req.body;
   const updated = {
-    ...registry[idx],
-    name: (name || registry[idx].name).trim(),
-    description: (description ?? registry[idx].description ?? '').trim(),
-    components: components ?? registry[idx].components ?? registry[idx].tags ?? [],
-    type: type !== undefined ? (type || null) : (registry[idx].type || registry[idx].typeOverride || null),
-    color: color !== undefined ? color : registry[idx].color,
-    commands: commands ?? registry[idx].commands,
+    ...ctx.store.registry[idx],
+    name: (name || ctx.store.registry[idx].name).trim(),
+    description: (description ?? ctx.store.registry[idx].description ?? '').trim(),
+    components: components ?? ctx.store.registry[idx].components ?? ctx.store.registry[idx].tags ?? [],
+    type: type !== undefined ? (type || null) : (ctx.store.registry[idx].type || ctx.store.registry[idx].typeOverride || null),
+    color: color !== undefined ? color : ctx.store.registry[idx].color,
+    commands: commands ?? ctx.store.registry[idx].commands,
     updatedAt: Date.now(),
   };
 
-  registry[idx] = updated;
-  saveRegistry();
+  ctx.store.registry[idx] = updated;
+  ctx.saveRegistry();
   res.json(updated);
 });
 
 // Remove a project from the registry
 app.delete('/api/projects/:id', (req, res) => {
   const { id } = req.params;
-  const idx = registry.findIndex(p => p.id === id);
-  if (idx === -1) return res.status(404).json({ error: t('error.projectNotFound') });
+  const idx = ctx.store.registry.findIndex(p => p.id === id);
+  if (idx === -1) return res.status(404).json({ error: ctx.t('error.projectNotFound') });
 
-  registry.splice(idx, 1);
-  saveRegistry();
+  ctx.store.registry.splice(idx, 1);
+  ctx.saveRegistry();
 
   // Clean up category assignments
-  delete categoriesData.assignments[id];
-  persistCategories();
+  delete ctx.store.categories.assignments[id];
+  ctx.saveCategories();
 
   // Kill running instances for this project
-  for (const [key, inst] of instances) {
+  for (const [key, inst] of ctx.store.instances) {
     if (key.startsWith(id + '__')) {
       inst.process.kill('SIGTERM');
-      instances.delete(key);
+      ctx.store.instances.delete(key);
     }
   }
 
@@ -473,10 +467,10 @@ app.get('/api/pick-folder', async (req, res) => {
     : os.homedir();
 
   const result = await dialog.showOpenDialog({
-    title:       t('dialog.pickFolder.title'),
+    title:       ctx.t('dialog.pickFolder.title'),
     defaultPath,
     properties:  ['openDirectory', 'createDirectory'],
-    buttonLabel: t('dialog.pickFolder.button'),
+    buttonLabel: ctx.t('dialog.pickFolder.button'),
   });
 
   if (result.canceled) return res.json({ canceled: true });
@@ -486,7 +480,7 @@ app.get('/api/pick-folder', async (req, res) => {
 // ─── Settings API ─────────────────────────────────────────────────────────────
 
 app.get('/api/settings', (req, res) => {
-  res.json(settings);
+  res.json(ctx.store.settings);
 });
 
 app.post('/api/settings', (req, res) => {
@@ -496,32 +490,32 @@ app.post('/api/settings', (req, res) => {
     // Basic validation
     if (incoming.devRoots !== undefined) {
       if (!Array.isArray(incoming.devRoots)) {
-        return res.status(400).json({ error: t('error.devRootsMustBeArray') });
+        return res.status(400).json({ error: ctx.t('error.devRootsMustBeArray') });
       }
       const cleaned = incoming.devRoots
         .map(p => String(p).trim().replace(/^~/, os.homedir()))
         .filter(Boolean);
       if (cleaned.length === 0) {
-        return res.status(400).json({ error: t('error.devRootsEmpty') });
+        return res.status(400).json({ error: ctx.t('error.devRootsEmpty') });
       }
       if (cleaned.some(p => !path.isAbsolute(p))) {
-        return res.status(400).json({ error: t('error.devRootMustBeAbsolute') });
+        return res.status(400).json({ error: ctx.t('error.devRootMustBeAbsolute') });
       }
       incoming.devRoots = cleaned;
     }
     if (incoming.scanDepth !== undefined) {
       incoming.scanDepth = Math.max(1, Math.min(10, parseInt(incoming.scanDepth, 10)));
-      if (isNaN(incoming.scanDepth)) return res.status(400).json({ error: t('error.scanDepthInvalid') });
+      if (isNaN(incoming.scanDepth)) return res.status(400).json({ error: ctx.t('error.scanDepthInvalid') });
     }
     if (incoming.ignoreDirs !== undefined && !Array.isArray(incoming.ignoreDirs)) {
-      return res.status(400).json({ error: t('error.ignoreDirsMustBeArray') });
+      return res.status(400).json({ error: ctx.t('error.ignoreDirsMustBeArray') });
     }
-    if (incoming.lang !== undefined && incoming.lang !== null && !catalogs[incoming.lang]) {
-      return res.status(400).json({ error: t('error.unknownLanguageCode') });
+    if (incoming.lang !== undefined && incoming.lang !== null && !ctx.store.catalogs[incoming.lang]) {
+      return res.status(400).json({ error: ctx.t('error.unknownLanguageCode') });
     }
 
-    settings = { ...settings, ...saveSettings({ ...settings, ...incoming }) };
-    res.json({ ok: true, settings });
+    ctx.store.settings = { ...ctx.store.settings, ...ctx.saveSettings({ ...ctx.store.settings, ...incoming }) };
+    res.json({ ok: true, settings: ctx.store.settings });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -530,7 +524,7 @@ app.post('/api/settings', (req, res) => {
 // Check whether a port is in use
 app.get('/api/port-check/:port', (req, res) => {
   const port = parseInt(req.params.port, 10);
-  if (!port || port < 1 || port > 65535) return res.status(400).json({ error: t('error.invalidPort') });
+  if (!port || port < 1 || port > 65535) return res.status(400).json({ error: ctx.t('error.invalidPort') });
   const net = require('net');
   const tester = net.createConnection({ port, host: '127.0.0.1' });
   tester.once('connect', () => { tester.destroy(); res.json({ inUse: true, port }); });
@@ -538,25 +532,23 @@ app.get('/api/port-check/:port', (req, res) => {
 });
 
 app.get('/api/locales', (req, res) => {
-  res.json(Object.keys(catalogs).map(code => ({
+  res.json(Object.keys(ctx.store.catalogs).map(code => ({
     code,
-    name: catalogs[code]['_meta.name'] || code,
+    name: ctx.store.catalogs[code]['_meta.name'] || code,
   })));
 });
 
 app.get('/api/version', (req, res) => {
-  res.json({ name: pkg.name, version: pkg.version, schemaVersion: CURRENT_SCHEMA_VERSION });
+  res.json({ name: ctx.pkg.name, version: ctx.pkg.version, schemaVersion: ctx.CURRENT_SCHEMA_VERSION });
 });
 
 app.get('/api/status', (req, res) => {
   const status = {};
-  instances.forEach((inst, id) => { status[id] = { projectId: inst.projectId, commandKey: inst.commandKey, startedAt: inst.startedAt, pid: inst.process.pid }; });
+  ctx.store.instances.forEach((inst, id) => { status[id] = { projectId: inst.projectId, commandKey: inst.commandKey, startedAt: inst.startedAt, pid: inst.process.pid }; });
   res.json(status);
 });
 
 // ─── SSE broadcast (real-time data) ──────────────────────────────────────────
-
-const broadcastClients = new Set();
 
 app.get('/api/events', (req, res) => {
   res.setHeader('Content-Type',  'text/event-stream');
@@ -567,38 +559,29 @@ app.get('/api/events', (req, res) => {
   // Heartbeat every 30s to keep the connection alive
   const hb = setInterval(() => res.write(': ping\n\n'), 30000);
 
-  broadcastClients.add(res);
-  req.on('close', () => { broadcastClients.delete(res); clearInterval(hb); });
+  ctx.store.broadcastClients.add(res);
+  req.on('close', () => { ctx.store.broadcastClients.delete(res); clearInterval(hb); });
 });
-
-function broadcast(event, data) {
-  const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-  broadcastClients.forEach(c => c.write(msg));
-}
 
 // ─── Favorites ───────────────────────────────────────────────────────────────
 
-const FAVORITES_FILE = path.join(DATA_DIR, 'favorites.json');
-const loadFavorites = () => favoritesLib.loadFavorites(FAVORITES_FILE);
-const saveFavorites = (set) => favoritesLib.saveFavorites(FAVORITES_FILE, set);
-
 app.get('/api/favorites', (req, res) => {
-  res.json([...loadFavorites()]);
+  res.json([...favoritesLib.loadFavorites(ctx.paths.FAVORITES_FILE)]);
 });
 
 app.post('/api/favorites/:id', (req, res) => {
-  const favs = loadFavorites();
+  const favs = favoritesLib.loadFavorites(ctx.paths.FAVORITES_FILE);
   favs.add(req.params.id);
-  saveFavorites(favs);
-  broadcast('favorites-changed', [...favs]);
+  favoritesLib.saveFavorites(ctx.paths.FAVORITES_FILE, favs);
+  ctx.broadcast('favorites-changed', [...favs]);
   res.json({ ok: true });
 });
 
 app.delete('/api/favorites/:id', (req, res) => {
-  const favs = loadFavorites();
+  const favs = favoritesLib.loadFavorites(ctx.paths.FAVORITES_FILE);
   favs.delete(req.params.id);
-  saveFavorites(favs);
-  broadcast('favorites-changed', [...favs]);
+  favoritesLib.saveFavorites(ctx.paths.FAVORITES_FILE, favs);
+  ctx.broadcast('favorites-changed', [...favs]);
   res.json({ ok: true });
 });
 
@@ -608,9 +591,9 @@ app.delete('/api/favorites/:id', (req, res) => {
 // understanding that /api/launch executes arbitrary shell commands.
 const server = app.listen(config.port, '127.0.0.1', () => {
   console.log(`\n🚀 Dev Launcher → http://localhost:${config.port}`);
-  console.log(`📁 Registry: ${registry.length} project${registry.length !== 1 ? 's' : ''} imported`);
-  if (registry.length > 0) {
-    registry.forEach(p => console.log(`  ✅ ${p.name}   ${p.path}`));
+  console.log(`📁 Registry: ${ctx.store.registry.length} project${ctx.store.registry.length !== 1 ? 's' : ''} imported`);
+  if (ctx.store.registry.length > 0) {
+    ctx.store.registry.forEach(p => console.log(`  ✅ ${p.name}   ${p.path}`));
   } else {
     console.log('  ℹ️  No projects in the registry — use "Add" or "Scan" to import projects.');
   }
@@ -621,10 +604,10 @@ const server = app.listen(config.port, '127.0.0.1', () => {
 // Kills launched commands to avoid leaving orphan processes when the
 // server (or Electron app) shuts down.
 function killAllInstances(signal = 'SIGTERM') {
-  for (const inst of instances.values()) {
+  for (const inst of ctx.store.instances.values()) {
     try { inst.process.kill(signal); } catch {}
   }
-  instances.clear();
+  ctx.store.instances.clear();
 }
 
 let shuttingDown = false;
@@ -639,8 +622,5 @@ function shutdownStandalone() {
 process.on('SIGINT',  shutdownStandalone);
 process.on('SIGTERM', shutdownStandalone);
 
-// Thin wrapper preserving the one-arg signature expected by tests and Electron.
-const scanProjects = (push) => scanner.scanProjects(push, { settings, t });
-
 // Exported so Electron can clean up processes on app.before-quit.
-module.exports = { killAllInstances, server, scanProjects };
+module.exports = { killAllInstances, server, scanProjects: ctx.scanProjects };
