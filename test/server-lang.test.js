@@ -6,7 +6,8 @@ const path = require('node:path');
 // Use an isolated backup so we never lose the developer's real settings.json.
 const SETTINGS = path.join(__dirname, '..', 'settings.json');
 const BACKUP = SETTINGS + '.testbak';
-if (fs.existsSync(SETTINGS)) fs.copyFileSync(SETTINGS, BACKUP);
+const HAD_SETTINGS = fs.existsSync(SETTINGS);
+if (HAD_SETTINGS) fs.copyFileSync(SETTINGS, BACKUP);
 
 process.env.PORT = '4457';
 const { server } = require('../server.js');
@@ -32,9 +33,22 @@ test('POST /api/settings rejects an unknown language', async () => {
   assert.strictEqual(r.status, 400);
 });
 
+test('POST /api/settings accepts lang: null (clears the language)', async () => {
+  const r = await fetch(BASE + '/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lang: null }),
+  });
+  assert.strictEqual(r.status, 200);
+});
+
 after(() => {
-  // Restore the developer's settings.json, then shut the server down cleanly.
-  if (fs.existsSync(BACKUP)) { fs.copyFileSync(BACKUP, SETTINGS); fs.unlinkSync(BACKUP); }
-  server.close();
+  if (HAD_SETTINGS) {
+    fs.copyFileSync(BACKUP, SETTINGS);
+    fs.unlinkSync(BACKUP);
+  } else if (fs.existsSync(SETTINGS)) {
+    fs.unlinkSync(SETTINGS); // the test created it; remove it on a clean checkout
+  }
   server.closeAllConnections();
+  server.close();
 });
