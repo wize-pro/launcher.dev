@@ -35,7 +35,7 @@ Launcher/
 ├── projects.json        # Project registry (path, name, ideId, ...)
 ├── favorites.json       # List of favorite project IDs
 ├── categories.json      # Functional categories
-└── settings.json        # User settings (devRoot, ides, lang, schemaVersion, ...)
+└── settings.json        # User settings (devRoots, ides, lang, schemaVersion, ...)
 ```
 
 ## How it works
@@ -69,7 +69,7 @@ The port defaults to `4242` and is overridable via the `PORT` environment variab
 | DELETE | `/api/projects/:id` | Remove a project from the registry |
 | PATCH | `/api/projects/:id/ide` | Set the preferred IDE for a project |
 | POST | `/api/projects/detect` | Auto-detect a project from a path (without importing) |
-| GET | `/api/scan-stream` | Scan devRoot with real-time progress (SSE stream) |
+| GET | `/api/scan-stream` | Scan all configured roots (`devRoots`) with real-time progress (SSE stream) |
 | POST | `/api/launch` | Start a project command |
 | POST | `/api/stop` | Stop a running command |
 | GET | `/api/logs/:instanceId` | Log stream for a running command (SSE) |
@@ -111,7 +111,7 @@ if (fs.existsSync(FILE)) data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
 fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 ```
 
-`settings.json` is merged with `SETTINGS_DEFAULTS` on read — new config keys are therefore backward-compatible. `settings.json` now includes a `schemaVersion` field. On startup, `runMigrations()` compares the stored version against `CURRENT_SCHEMA_VERSION` and runs any pending migration steps (currently: registry schema normalization at v1). The JSON data files are gitignored and must not be committed.
+`settings.json` is merged with `SETTINGS_DEFAULTS` on read — new config keys are therefore backward-compatible. `settings.json` now includes a `schemaVersion` field. On startup, `runMigrations()` compares the stored version against `CURRENT_SCHEMA_VERSION` and runs any pending migration steps (v1: registry schema normalization; v2: legacy single `devRoot` → `devRoots` array). The JSON data files are gitignored and must not be committed.
 
 ## i18n system
 
