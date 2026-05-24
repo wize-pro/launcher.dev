@@ -23,3 +23,4 @@ Live board: <https://github.com/users/wize-pro/projects/1>
 ## Unscheduled / backlog
 
 - [ ] #9 Fill the wiki on GitHub — _documentation_
+- [ ] #11 Make server tests self-contained (temp DATA_DIR) to remove serial-run constraint — _enhancement_
