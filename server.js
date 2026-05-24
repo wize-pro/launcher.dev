@@ -82,6 +82,8 @@ const SETTINGS_DEFAULTS = {
     { id: 'windsurf', name: 'Windsurf',  cmd: 'windsurf'  },
   ],
   defaultIde: 'vscode',
+  // Active UI/server language (locale code). null = not chosen yet → client detects it.
+  lang: null,
   // Version du schéma des données persistées (gère les migrations). Voir runMigrations().
   schemaVersion: 1,
 };
@@ -1202,6 +1204,9 @@ app.post('/api/settings', (req, res) => {
     }
     if (incoming.ignoreDirs !== undefined && !Array.isArray(incoming.ignoreDirs)) {
       return res.status(400).json({ error: 'ignoreDirs doit être un tableau' });
+    }
+    if (incoming.lang !== undefined && incoming.lang !== null && !catalogs[incoming.lang]) {
+      return res.status(400).json({ error: 'Unknown language code' });
     }
 
     settings = { ...settings, ...saveSettings({ ...settings, ...incoming }) };
