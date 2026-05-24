@@ -11,6 +11,9 @@ const { loadCatalogs } = require('./lib/i18n.js');
 const { resolveIdeExec } = require('./lib/ides.js');
 const gitLib = require('./lib/git.js');
 const scanner = require('./lib/scanner.js');
+const registryLib  = require('./lib/registry.js');
+const categoriesLib = require('./lib/categories.js');
+const favoritesLib  = require('./lib/favorites.js');
 
 // Where to persist user data (projects.json, settings.json, …). In a PACKAGED
 // Electron build the source directory is read-only (inside the app bundle/asar),
@@ -122,58 +125,17 @@ let settings = loadSettings();
 
 const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
 
-function loadCategories() {
-  try {
-    if (fs.existsSync(CATEGORIES_FILE))
-      return JSON.parse(fs.readFileSync(CATEGORIES_FILE, 'utf8'));
-  } catch (e) {
-    console.warn('⚠️  Cannot read categories.json:', e.message);
-  }
-  return { categories: [], assignments: {} };
-}
-
-function persistCategories() {
-  fs.writeFileSync(CATEGORIES_FILE, JSON.stringify(categoriesData, null, 2), 'utf8');
-}
-
-let categoriesData = loadCategories();
+let categoriesData = categoriesLib.loadCategories(CATEGORIES_FILE);
+const persistCategories = () => categoriesLib.saveCategories(CATEGORIES_FILE, categoriesData);
 
 // ─── Project Registry (source of truth) ──────────────────────────────────────
 
 const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json');
-
-function loadRegistry() {
-  try {
-    if (fs.existsSync(PROJECTS_FILE))
-      return JSON.parse(fs.readFileSync(PROJECTS_FILE, 'utf8'));
-  } catch (e) {
-    console.warn('⚠️  Cannot read projects.json:', e.message);
-  }
-  return [];
-}
-
-function saveRegistry() {
-  fs.writeFileSync(PROJECTS_FILE, JSON.stringify(registry, null, 2), 'utf8');
-}
-
-let registry = loadRegistry();
+const normalizeProject = registryLib.normalizeProject;
+let registry = registryLib.loadRegistry(PROJECTS_FILE);
+const saveRegistry = () => registryLib.saveRegistry(PROJECTS_FILE, registry);
 
 // ─── Data schema & migrations ─────────────────────────────────────────────────
-
-// Normalizes a project to the current canonical schema:
-//   components = tech stack · type = manual type · subProjects = sub-projects
-// Absorbs legacy fields (tags, typeOverride, structural components of a multi-project).
-// Idempotent: applying multiple times has no effect.
-function normalizeProject(p) {
-  const isOldMulti = p.source === 'multi' && !p.subProjects;
-  const components = isOldMulti
-    ? (p.tags || []).filter(t => t !== 'multi')
-    : (p.components && !p.subProjects && p.tags ? p.tags : (p.components || p.tags || []));
-  const subProjects = p.subProjects || (isOldMulti ? p.components || [] : []);
-  const type = p.type || p.typeOverride || null;
-  const { tags, typeOverride, ...rest } = p;
-  return { ...rest, components, subProjects, type };
-}
 
 // Migration v1: rewrites the registry to the canonical schema (removes tags/typeOverride).
 function migrateRegistryToCanonical() {
@@ -413,7 +375,7 @@ app.patch('/api/projects/:id/ide', (req, res) => {
   if (!project) return res.status(404).json({ error: t('error.projectNotFound') });
   if (ideId) project.ideId = ideId;
   else delete project.ideId;
-  fs.writeFileSync(PROJECTS_FILE, JSON.stringify(registry, null, 2));
+  saveRegistry();
   broadcast('project-ide-changed', { id: project.id, ideId: project.ideId ?? null });
   res.json({ ok: true });
 });
@@ -715,17 +677,8 @@ function broadcast(event, data) {
 // ─── Favorites ───────────────────────────────────────────────────────────────
 
 const FAVORITES_FILE = path.join(DATA_DIR, 'favorites.json');
-
-function loadFavorites() {
-  try {
-    if (fs.existsSync(FAVORITES_FILE)) return new Set(JSON.parse(fs.readFileSync(FAVORITES_FILE, 'utf8')));
-  } catch {}
-  return new Set();
-}
-
-function saveFavorites(set) {
-  fs.writeFileSync(FAVORITES_FILE, JSON.stringify([...set], null, 2));
-}
+const loadFavorites = () => favoritesLib.loadFavorites(FAVORITES_FILE);
+const saveFavorites = (set) => favoritesLib.saveFavorites(FAVORITES_FILE, set);
 
 app.get('/api/favorites', (req, res) => {
   res.json([...loadFavorites()]);
