@@ -1551,7 +1551,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <!-- ══ PORT FILTER BANNER ══ -->
 <div class="port-filter-bar" id="port-filter-bar">
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-  <span id="port-filter-label">Filtrage par port</span>
+  <span id="port-filter-label"></span>
   <button class="port-filter-clear" onclick="clearPortFilter()" data-i18n="cat.clear">✕ Clear</button>
 </div>
 
@@ -1932,6 +1932,13 @@ const PROJECT_TYPES = {
   },
 };
 
+// Translated label for a project type id (falls back to the hardcoded label).
+function typeLabel(id) {
+  const def = PROJECT_TYPES[id] || PROJECT_TYPES.unknown;
+  const translated = t('type.label.' + id);
+  return translated === 'type.label.' + id ? def.label : translated;
+}
+
 // ══ Known components registry ══════════════════════════════════════════════
 const KNOWN_COMPONENTS = {
   node:           { label: 'Node.js',      color: '#f59e0b' },
@@ -2094,7 +2101,7 @@ function computeCompatibleTypes(p) {
 function typeIconHtml(p) {
   const type = detectProjectType(p);
   const def  = PROJECT_TYPES[type] || PROJECT_TYPES.unknown;
-  return `<span class="ptype-icon" title="${def.label}" style="color:${def.color};background:${def.bg}">${def.svg}</span>`;
+  return `<span class="ptype-icon" title="${typeLabel(type)}" style="color:${def.color};background:${def.bg}">${def.svg}</span>`;
 }
 
 // ══ Git icon ═══════════════════════════════════════════════════════════════
@@ -2224,13 +2231,14 @@ function renderTypeBar() {
 
   pills.innerHTML = entries.map(([type, cnt]) => {
     const def = PROJECT_TYPES[type] || PROJECT_TYPES.unknown;
+    const label = typeLabel(type);
     const isActive = activeTypes.has(type);
     return `<button class="tfp ${isActive ? 'active' : ''}"
       style="--type-color:${def.color};--type-bg:${def.bg}"
       onclick="toggleTypeFilter('${type}')"
-      title="${def.label}">
+      title="${label}">
       <span class="tfp-icon" style="color:${isActive ? def.color : 'var(--t3)'}">${def.svg}</span>
-      ${def.label.split('/')[0].trim()}
+      ${label.split('/')[0].trim()}
       <span style="font-size:10px;opacity:.6">${cnt}</span>
     </button>`;
   }).join('');
@@ -3422,21 +3430,21 @@ function renderImportTypeGrid() {
     const warnHtml    = isDisc && !isSelected ? `<span class="type-sel-warn-icon">⚠</span>` : '';
     const typeColor   = def.color;
     const typeBg      = def.bg;
+    const label       = typeLabel(type);
     return `<button class="type-sel-btn ${isSelected?'active':''} ${isDisc?'discouraged':''}"
       style="--type-color:${typeColor};--type-bg:${typeBg}"
-      title="${def.label}${isDisc?' — '+t('type.uncommonHint'):''}"
+      title="${label}${isDisc?' — '+t('type.uncommonHint'):''}"
       onclick="selectImportType('${type}')">
       ${starHtml}
       <span style="color:${isSelected?typeColor:'var(--t3)'};">${def.svg}</span>
-      ${def.label.split('/')[0].trim()}
+      ${label.split('/')[0].trim()}
       ${warnHtml}
     </button>`;
   }).join('');
 
   // Warning if selected type is discouraged
   if (discouraged.includes(selected) && selected !== 'unknown') {
-    const def = PROJECT_TYPES[selected];
-    warnEl.textContent = t('type.uncommon', { type: def?.label || selected });
+    warnEl.textContent = t('type.uncommon', { type: typeLabel(selected) });
     warnEl.classList.add('visible');
   } else {
     warnEl.classList.remove('visible');
