@@ -9,7 +9,7 @@ Live board: <https://github.com/users/wize-pro/projects/1>
 
 ## v0.2.0 — Next iteration
 
-- [ ] #1 Add many Projects root — _enhancement_
+- [x] #1 Add many Projects root — _enhancement_
 - [ ] #2 Cross-platform tray icon (light/colored variant for Windows & Linux) — _enhancement_
 - [ ] #4 Add a screenshot to the README — _documentation_
 - [ ] #5 Add more UI languages (es, de, …) — _enhancement_
