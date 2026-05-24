@@ -23,6 +23,8 @@
   "settings.ides.section": "Éditeurs de code",
   "settings.ide.addPreset": "Ajouter un éditeur…",
   "settings.ide.custom": "Personnalisé…",
+  "settings.ide.custom.name": "Nom (ex: Neovim)",
+  "settings.ide.custom.cmd": "Commande (ex: nvim)",
   "settings.ide.add": "Ajouter",
   "settings.cats.section": "Catégories fonctionnelles",
   "settings.cats.placeholder": "Nom de la catégorie…",
