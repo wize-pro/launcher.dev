@@ -1608,8 +1608,7 @@ async function initI18n() {
   }
   LANG = lang;
   localStorage.setItem('dlLang', lang);
-  await loadCatalog('en');
-  await loadCatalog(lang);
+  await Promise.all([loadCatalog('en'), loadCatalog(lang)]);
   applyTranslations();
 }
 
@@ -3759,7 +3758,11 @@ async function initSettings() {
 }
 
 loadCategories();
-initI18n().then(() => initSettings()).then(() => loadFavorites()).then(() => loadProjects());
+initI18n()
+  .catch(err => console.error('i18n boot failed', err))
+  .then(() => initSettings())
+  .then(() => loadFavorites())
+  .then(() => loadProjects());
 setInterval(loadProjects, 10000);
 connectEvents();
 
