@@ -2689,8 +2689,9 @@ function startScan() {
     document.getElementById('so-footer-text').innerHTML= t('scan.footer', {
         found: `<strong style="color:var(--tx)">${found}</strong>`,
         foundPlural: found!==1?'s':'',
-        newCount: `<strong style="color:${newCount>0?'var(--ac)':'var(--t2)'}">${newCount}</strong>`,
-        newPlural: newCount!==1?'x':''
+        newPhrase: t(newCount===1?'scan.newOne':'scan.newMany', {
+          count: `<strong style="color:${newCount>0?'var(--ac)':'var(--t2)'}">${newCount}</strong>`
+        }),
       });
     const importAllBtn = document.getElementById('so-import-all');
     if (newCount > 0) importAllBtn.classList.add('visible');

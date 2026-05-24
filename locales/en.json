@@ -117,7 +117,9 @@
   "scan.alreadyHeader": "✓ Already imported ({count})",
   "scan.importBtn": "⊕ Import",
   "scan.importedBadge": "✓ Imported",
-  "scan.footer": "{found} project{foundPlural} detected — {newCount} new{newPlural}",
+  "scan.newOne": "{count} new",
+  "scan.newMany": "{count} new",
+  "scan.footer": "{found} project{foundPlural} detected — {newPhrase}",
   "terminal.empty": "Start a project to see logs here.",
   "terminal.noLog": "No log.",
   "terminal.clear": "Clear",
@@ -147,7 +149,7 @@
   "date.daysAgo": "{d} days ago",
   "date.weeksAgo": "{w} wk. ago",
   "date.monthsAgo": "{mo} mo. ago",
-  "date.yearsAgo": "{y} yr ago",
+  "date.yearsAgo": "{y} yr{yearPlural} ago",
   "editor.cantOpen": "Cannot open {name}: {error}\n\nCheck that the \"{cmd}\" command is available in your PATH.",
   "main.loading": "Loading…"
 }
