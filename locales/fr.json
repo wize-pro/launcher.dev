@@ -185,7 +185,7 @@
   "date.yearsAgo": "il y a {y} an{yearPlural}",
   "editor.cantOpen": "Impossible d'ouvrir {name} : {error}\n\nVérifie que la commande \"{cmd}\" est disponible dans ton PATH.",
   "main.loading": "Chargement…",
-  "scan.log.devRootNotFound": "devRoot introuvable : {root}",
+  "scan.log.devRootNotFound": "Dossier racine introuvable : {root}",
   "scan.log.root": "Racine : {root}   (profondeur max : {depth})",
   "scan.log.cannotRead": "Impossible de lire {dir} : {msg}",
   "scan.log.nameMissing": "{file} : champ \"name\" manquant",

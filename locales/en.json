@@ -185,7 +185,7 @@
   "date.yearsAgo": "{y} yr{yearPlural} ago",
   "editor.cantOpen": "Cannot open {name}: {error}\n\nCheck that the \"{cmd}\" command is available in your PATH.",
   "main.loading": "Loading…",
-  "scan.log.devRootNotFound": "devRoot not found: {root}",
+  "scan.log.devRootNotFound": "Root folder not found: {root}",
   "scan.log.root": "Root: {root}   (max depth: {depth})",
   "scan.log.cannotRead": "Cannot read {dir}: {msg}",
   "scan.log.nameMissing": "{file}: missing \"name\" field",
