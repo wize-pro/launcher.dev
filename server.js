@@ -261,8 +261,22 @@ function migrateRegistryToCanonical() {
   if (changed) saveRegistry();
 }
 
+// Migration v2: replaces the legacy scalar `devRoot` with a `devRoots` array.
+function migrateSettingsToMultiRoot() {
+  let raw = {};
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) raw = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch {}
+  if (typeof raw.devRoot === 'string' && !Array.isArray(raw.devRoots)) {
+    settings.devRoots = [raw.devRoot];
+    delete settings.devRoot;
+    saveSettings(settings);
+  }
+}
+
 const MIGRATIONS = {
   1: migrateRegistryToCanonical,
+  2: migrateSettingsToMultiRoot,
 };
 
 // Reads the schema version actually stored in settings.json (without merging defaults),
