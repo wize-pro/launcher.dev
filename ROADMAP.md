@@ -24,3 +24,5 @@ Live board: <https://github.com/users/wize-pro/projects/1>
 
 - [x] #9 Maintain the GitHub wiki (full refresh on major versions) — _documentation_
 - [ ] #11 Make server tests self-contained (temp DATA_DIR) to remove serial-run constraint — _enhancement_
+- [ ] #12 Modularize server.js into lib/ + routes/ — _enhancement_
+- [ ] #13 Extract CSS and JS from index.html into native files/modules — _enhancement_
