@@ -13,7 +13,9 @@
     let str = key in active ? active[key] : (key in base ? base[key] : key);
     if (params) {
       for (const k of Object.keys(params)) {
-        str = str.split('{' + k + '}').join(String(params[k]));
+        if (params[k] != null) {
+          str = str.split('{' + k + '}').join(String(params[k]));
+        }
       }
     }
     return str;

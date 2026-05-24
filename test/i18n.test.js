@@ -27,6 +27,24 @@ test('translate handles an unknown active language by using English', () => {
   assert.strictEqual(translate(cat, 'zz', 'greeting'), 'Hello');
 });
 
+test('translate falls back to the raw key when catalogs is null', () => {
+  assert.strictEqual(translate(null, 'en', 'missing.key'), 'missing.key');
+});
+
+test('translate interpolates multiple placeholders', () => {
+  const cat = { en: { x: '{a} and {b}' } };
+  assert.strictEqual(translate(cat, 'en', 'x', { a: 1, b: 2 }), '1 and 2');
+});
+
+test('translate leaves the placeholder untouched for a null/undefined param', () => {
+  const cat = { en: { x: '{a}' } };
+  assert.strictEqual(translate(cat, 'en', 'x', { a: undefined }), '{a}');
+});
+
+test('detectLang falls back to English with an empty supported list', () => {
+  assert.strictEqual(detectLang('fr', []), 'en');
+});
+
 test('detectLang picks the supported base language', () => {
   assert.strictEqual(detectLang('fr-FR', ['en', 'fr']), 'fr');
 });
