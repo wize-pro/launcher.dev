@@ -90,5 +90,6 @@
   "cat.assignTitle": "Assigner une catégorie",
   "cat.filterBy": "Filtrer par {name}",
   "cat.empty": "Aucune catégorie — cliquez sur Gérer pour en créer",
-  "cat.popEmpty": "Aucune catégorie encore.\nCréez-en une ci-dessous."
+  "cat.popEmpty": "Aucune catégorie encore.\nCréez-en une ci-dessous.",
+  "cat.popPlaceholder": "Nouvelle catégorie…"
 }

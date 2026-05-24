@@ -2948,7 +2948,7 @@ function openCatPopover(projectId, anchor) {
 
   html += `<div class="cat-pop-sep"></div>
     <div class="cat-pop-new">
-      <input id="pop-new-cat" type="text" placeholder="Nouvelle catégorie…" onkeydown="if(event.key==='Enter')quickCreateCat('${projectId}')"/>
+      <input id="pop-new-cat" type="text" placeholder="${t('cat.popPlaceholder')}" onkeydown="if(event.key==='Enter')quickCreateCat('${projectId}')"/>
       <button onclick="quickCreateCat('${projectId}')">+</button>
     </div>`;
 
