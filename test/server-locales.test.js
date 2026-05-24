@@ -2,7 +2,7 @@ const { test, after } = require('node:test');
 const assert = require('node:assert');
 
 process.env.PORT = '4456';
-require('../server.js'); // starts listening on 127.0.0.1:4456
+const { server } = require('../server.js'); // starts listening on 127.0.0.1:4456
 
 const BASE = 'http://localhost:4456';
 
@@ -27,5 +27,4 @@ test('GET /locales/fr.json is served statically', async () => {
   assert.strictEqual(json['settings.title'], 'Paramètres');
 });
 
-const { server } = require('../server.js');
 after(() => { server.close(); server.closeAllConnections(); });

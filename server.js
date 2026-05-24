@@ -33,6 +33,8 @@ function loadCatalogs() {
 let catalogs = loadCatalogs();
 
 // Translate a key using the given language (defaults to the active settings language).
+// NOTE: relies on the module-level `settings` (declared later); must not be called during
+// module initialization, only from request handlers. Call sites are added in Phase 2.
 function t(key, lang, params) {
   return i18n.translate(catalogs, lang || settings.lang || 'en', key, params);
 }
