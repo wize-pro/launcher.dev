@@ -8,6 +8,19 @@ const config = require('./launcher.config');
 const pkg = require('./package.json');
 const i18n = require('./public/i18n.js');
 
+// Where to persist user data (projects.json, settings.json, …). In a PACKAGED
+// Electron build the source directory is read-only (inside the app bundle/asar),
+// so we use Electron's per-user data dir. In every dev mode — standalone
+// `node server.js` and unpackaged `npm run app` — we keep the project root for a
+// zero-config experience, so existing data stays where it is.
+let DATA_DIR = __dirname;
+if (process.versions.electron) {
+  try {
+    const { app } = require('electron');
+    if (app.isPackaged) DATA_DIR = app.getPath('userData');
+  } catch {}
+}
+
 // ─── Locale catalogs ───────────────────────────────────────────────────────────
 const LOCALES_DIR = path.join(__dirname, 'locales');
 
@@ -69,7 +82,7 @@ app.use('/locales', express.static(LOCALES_DIR));
 
 // ─── Settings (persisted in settings.json) ────────────────────────────────────
 
-const SETTINGS_FILE = path.join(__dirname, 'settings.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 // Default values from launcher.config.js
 const SETTINGS_DEFAULTS = {
@@ -182,7 +195,7 @@ let settings = loadSettings();
 
 // ─── Categories (persisted in categories.json) ────────────────────────────────
 
-const CATEGORIES_FILE = path.join(__dirname, 'categories.json');
+const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
 
 function loadCategories() {
   try {
@@ -202,7 +215,7 @@ let categoriesData = loadCategories();
 
 // ─── Project Registry (source of truth) ──────────────────────────────────────
 
-const PROJECTS_FILE = path.join(__dirname, 'projects.json');
+const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json');
 
 function loadRegistry() {
   try {
@@ -1269,7 +1282,7 @@ function broadcast(event, data) {
 
 // ─── Favorites ───────────────────────────────────────────────────────────────
 
-const FAVORITES_FILE = path.join(__dirname, 'favorites.json');
+const FAVORITES_FILE = path.join(DATA_DIR, 'favorites.json');
 
 function loadFavorites() {
   try {

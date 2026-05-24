@@ -20,13 +20,40 @@
     "dev": "node --watch server.js",
     "app": "electron .",
     "app:dev": "NODE_ENV=development electron .",
-    "test": "node --test"
+    "test": "node --test",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "express": "^4.18.2",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "electron": "^42.0.0"
+    "electron": "^42.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "dev.wize.launcher",
+    "productName": "Dev Launcher",
+    "files": [
+      "main.js",
+      "server.js",
+      "launcher.config.js",
+      "public/**/*",
+      "locales/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Development"
+    }
   }
 }
