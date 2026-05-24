@@ -4,7 +4,7 @@ const assert = require('node:assert');
 process.env.PORT = '4456';
 const { server } = require('../server.js'); // starts listening on 127.0.0.1:4456
 
-const BASE = 'http://localhost:4456';
+const BASE = 'http://127.0.0.1:4456';
 
 async function get(path) {
   const r = await fetch(BASE + path);
