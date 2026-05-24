@@ -1280,14 +1280,10 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
         <div class="settings-section-title" data-i18n="settings.scan.section">Project scan</div>
 
         <div class="settings-field">
-          <label class="settings-label" data-i18n="settings.devRoot.label">Projects root folder</label>
-          <div class="settings-input-row">
-            <input class="settings-input" id="cfg-devRoot" type="text" placeholder="~/dev" data-i18n-placeholder="settings.devRoot.placeholder" spellcheck="false"/>
-            <button class="btn-pick-folder" onclick="pickFolderInto('cfg-devRoot')" title="Browse…" data-i18n-title="settings.devRoot.browse">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            </button>
-          </div>
-          <span class="settings-hint" data-i18n="settings.devRoot.hint">Absolute path or with ~. All projects will be searched inside this folder.</span>
+          <label class="settings-label" data-i18n="settings.devRoots.label">Project root folders</label>
+          <div id="cfg-devRoots-list"></div>
+          <button type="button" class="settings-browse" onclick="addDevRootRow()" data-i18n="settings.devRoots.add">Add root</button>
+          <span class="settings-hint" data-i18n="settings.devRoots.hint">Absolute paths or with ~. Every listed folder is scanned for projects.</span>
         </div>
 
         <div class="settings-field">
@@ -3126,7 +3122,7 @@ async function openSettings() {
   try {
     const r = await fetch('/api/settings');
     const s = await r.json();
-    document.getElementById('cfg-devRoot').value    = s.devRoot || '';
+    renderDevRoots(s.devRoots);
     document.getElementById('cfg-scanDepth').value  = s.scanDepth ?? 5;
     document.getElementById('cfg-ignoreDirs').value = (s.ignoreDirs || []).join(', ');
     // Load IDEs
@@ -3157,16 +3153,19 @@ async function saveSettings() {
   const msg = document.getElementById('settings-msg');
   msg.className = 'settings-msg';
 
-  const devRoot   = document.getElementById('cfg-devRoot').value.trim();
+  const devRoots = [...document.querySelectorAll('#cfg-devRoots-list .dev-root-input')]
+    .map(i => i.value.trim()).filter(Boolean);
   const scanDepth = parseInt(document.getElementById('cfg-scanDepth').value, 10);
   const ignoreDirsRaw = document.getElementById('cfg-ignoreDirs').value;
   const ignoreDirs = ignoreDirsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
-  if (!devRoot) {
-    document.getElementById('cfg-devRoot').classList.add('error');
+  if (devRoots.length === 0) {
+    document.querySelectorAll('#cfg-devRoots-list .dev-root-input').forEach(i => i.classList.add('error'));
+    msg.textContent = t('error.devRootsEmpty');
+    msg.className = 'settings-msg err';
     return;
   }
-  document.getElementById('cfg-devRoot').classList.remove('error');
+  document.querySelectorAll('#cfg-devRoots-list .dev-root-input').forEach(i => i.classList.remove('error'));
 
   btn.disabled = true;
   btn.textContent = t('common.saving');
@@ -3174,7 +3173,7 @@ async function saveSettings() {
     const r = await fetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ devRoot, scanDepth, ignoreDirs, ides: idesList, defaultIde: defaultIdeId }),
+      body: JSON.stringify({ devRoots, scanDepth, ignoreDirs, ides: idesList, defaultIde: defaultIdeId }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || t('common.serverError'));
@@ -3199,8 +3198,45 @@ async function saveSettings() {
 
 // ══ Native folder picker ══════════════════════════════════════════════════
 
-async function pickFolderInto(inputId) {
-  const input = document.getElementById(inputId);
+function devRootRowHtml(value) {
+  const v = escHtml(value || '');
+  return `<div class="settings-input-row dev-root-row" style="margin-bottom:6px">
+    <input class="settings-input dev-root-input" type="text" value="${v}" placeholder="~/dev" data-i18n-placeholder="settings.devRoots.placeholder" spellcheck="false"/>
+    <button class="btn-pick-folder" type="button" onclick="pickFolderIntoRow(this)" data-i18n-title="settings.devRoots.browse" title="Browse…">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="btn-pick-folder" type="button" onclick="removeDevRootRow(this)" data-i18n-title="settings.devRoots.remove" title="Remove this root">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>`;
+}
+
+function renderDevRoots(roots) {
+  const list = document.getElementById('cfg-devRoots-list');
+  const arr = (Array.isArray(roots) && roots.length) ? roots : [''];
+  list.innerHTML = arr.map(devRootRowHtml).join('');
+  applyTranslations();
+}
+
+function addDevRootRow() {
+  const list = document.getElementById('cfg-devRoots-list');
+  list.insertAdjacentHTML('beforeend', devRootRowHtml(''));
+  applyTranslations();
+}
+
+function removeDevRootRow(btn) {
+  const list = document.getElementById('cfg-devRoots-list');
+  const row = btn.closest('.dev-root-row');
+  if (row) row.remove();
+  if (!list.querySelector('.dev-root-row')) addDevRootRow(); // never leave zero rows
+}
+
+function pickFolderIntoRow(btn) {
+  const input = btn.closest('.dev-root-row')?.querySelector('.dev-root-input');
+  if (input) pickFolderIntoElement(input);
+}
+
+async function pickFolderIntoElement(input) {
   const current = input?.value?.trim() || '';
   try {
     const url = '/api/pick-folder' + (current ? '?current=' + encodeURIComponent(current) : '');
@@ -3215,6 +3251,10 @@ async function pickFolderInto(inputId) {
       input.dispatchEvent(new Event('input'));
     }
   } catch { /* silent */ }
+}
+
+function pickFolderInto(inputId) {
+  pickFolderIntoElement(document.getElementById(inputId));
 }
 
 // ══ IDE Settings ══════════════════════════════════════════════════════════

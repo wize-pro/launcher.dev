@@ -86,7 +86,7 @@ const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 // Default values from launcher.config.js
 const SETTINGS_DEFAULTS = {
-  devRoot:    config.devRoot,
+  devRoots:   [config.devRoot],
   scanDepth:  config.scanDepth,
   ignoreDirs: config.ignoreDirs,
   ides: [
@@ -98,7 +98,7 @@ const SETTINGS_DEFAULTS = {
   // Active UI/server language (locale code). null = not chosen yet → client detects it.
   lang: null,
   // Persisted data schema version (handles migrations). See runMigrations().
-  schemaVersion: 1,
+  schemaVersion: 2,
 };
 
 // Current data schema version. Increment on every change to the JSON file format,
@@ -261,8 +261,22 @@ function migrateRegistryToCanonical() {
   if (changed) saveRegistry();
 }
 
+// Migration v2: replaces the legacy scalar `devRoot` with a `devRoots` array.
+function migrateSettingsToMultiRoot() {
+  let raw = {};
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) raw = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch {}
+  if (typeof raw.devRoot === 'string' && !Array.isArray(raw.devRoots)) {
+    settings.devRoots = [raw.devRoot];
+    delete settings.devRoot;
+    saveSettings(settings);
+  }
+}
+
 const MIGRATIONS = {
   1: migrateRegistryToCanonical,
+  2: migrateSettingsToMultiRoot,
 };
 
 // Reads the schema version actually stored in settings.json (without merging defaults),
@@ -586,27 +600,20 @@ function scanProjects(push) {
   const projects = [];
   const emit = typeof push === 'function' ? push : () => {};
 
-  if (!fs.existsSync(settings.devRoot)) {
-    emit('warn', t('scan.log.devRootNotFound', undefined, { root: settings.devRoot }));
-    return projects;
-  }
-
-  emit('info', t('scan.log.root', undefined, { root: settings.devRoot, depth: settings.scanDepth }));
-
-  function walk(dir, depth) {
+  function walk(dir, depth, root) {
     if (depth > settings.scanDepth) return;
 
     let entries;
     try {
       entries = fs.readdirSync(dir, { withFileTypes: true });
     } catch (e) {
-      emit('warn', t('scan.log.cannotRead', undefined, { dir: path.relative(settings.devRoot, dir), msg: e.message }));
+      emit('warn', t('scan.log.cannotRead', undefined, { dir: path.relative(root, dir), msg: e.message }));
       return;
     }
 
     const folderName  = path.basename(dir);
     const displayName = smartName(dir);           // ← smart name (climbs up if generic)
-    const relDir      = path.relative(settings.devRoot, dir) || '.';
+    const relDir      = path.relative(root, dir) || '.';
     const id          = Buffer.from(dir).toString('base64url');
 
     // ── 1. .launcher.yml (absolute priority) ─────────────────────────────────
@@ -706,11 +713,19 @@ function scanProjects(push) {
       emit('explore', t(subfolderKey, undefined, { dir: relDir, count: subdirs.length }));
     }
     for (const entry of subdirs) {
-      walk(path.join(dir, entry.name), depth + 1);
+      walk(path.join(dir, entry.name), depth + 1, root);
     }
   }
 
-  walk(settings.devRoot, 1);
+  const roots = Array.isArray(settings.devRoots) ? settings.devRoots : [];
+  for (const root of roots) {
+    if (!fs.existsSync(root)) {
+      emit('warn', t('scan.log.devRootNotFound', undefined, { root }));
+      continue;
+    }
+    emit('info', t('scan.log.root', undefined, { root, depth: settings.scanDepth }));
+    walk(root, 1, root);
+  }
   const doneKey = projects.length === 1 ? 'scan.log.doneOne' : 'scan.log.doneMany';
   emit('done', t(doneKey, undefined, { count: projects.length }));
   return projects;
@@ -1206,12 +1221,20 @@ app.post('/api/settings', (req, res) => {
     const incoming = req.body;
 
     // Basic validation
-    if (incoming.devRoot) {
-      // Expand ~ if needed
-      incoming.devRoot = incoming.devRoot.replace(/^~/, os.homedir());
-      if (!path.isAbsolute(incoming.devRoot)) {
+    if (incoming.devRoots !== undefined) {
+      if (!Array.isArray(incoming.devRoots)) {
+        return res.status(400).json({ error: t('error.devRootsMustBeArray') });
+      }
+      const cleaned = incoming.devRoots
+        .map(p => String(p).trim().replace(/^~/, os.homedir()))
+        .filter(Boolean);
+      if (cleaned.length === 0) {
+        return res.status(400).json({ error: t('error.devRootsEmpty') });
+      }
+      if (cleaned.some(p => !path.isAbsolute(p))) {
         return res.status(400).json({ error: t('error.devRootMustBeAbsolute') });
       }
+      incoming.devRoots = cleaned;
     }
     if (incoming.scanDepth !== undefined) {
       incoming.scanDepth = Math.max(1, Math.min(10, parseInt(incoming.scanDepth, 10)));
@@ -1353,4 +1376,4 @@ process.on('SIGINT',  shutdownStandalone);
 process.on('SIGTERM', shutdownStandalone);
 
 // Exported so Electron can clean up processes on app.before-quit.
-module.exports = { killAllInstances, server };
+module.exports = { killAllInstances, server, scanProjects };

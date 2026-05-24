@@ -36,7 +36,7 @@ npm run app        # Electron app (tray + floating window)
 npm run app:dev    # Electron in dev mode (DevTools open)
 ```
 
-On first launch, open **Settings** to set the root folder (`devRoot`) where your projects live, then run a **Scan** to detect them automatically. You can also add a project manually by path.
+On first launch, open **Settings** to add one or more root folders (`devRoots`) where your projects live, then run a **Scan** to detect them automatically. You can also add a project manually by path.
 
 ### Per-project configuration (optional)
 
@@ -60,7 +60,7 @@ All data is stored as JSON at the project root and is **not versioned** (see `.g
 | `projects.json` | Registry of imported projects |
 | `favorites.json` | IDs of favorite projects |
 | `categories.json` | Categories and assignments |
-| `settings.json` | Settings (devRoot, IDEs, scan depth, ...) |
+| `settings.json` | Settings (devRoots, IDEs, scan depth, ...) |
 
 The default port is `4242` (overridable via the `PORT` environment variable; defined in `launcher.config.js`).
 
