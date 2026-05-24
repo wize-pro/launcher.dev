@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1024" height="1024" rx="232" fill="url(#bg)"/>
+  <g fill="#ffffff">
+    <!-- body + nose -->
+    <path d="M512 224
+             C 602 318, 636 454, 636 566
+             L 636 636
+             L 388 636
+             L 388 566
+             C 388 454, 422 318, 512 224 Z"/>
+    <!-- left fin -->
+    <path d="M388 560 L 292 706 L 388 664 Z"/>
+    <!-- right fin -->
+    <path d="M636 560 L 732 706 L 636 664 Z"/>
+    <!-- exhaust flame -->
+    <path d="M454 636 L 570 636 L 540 724 Q 512 768 484 724 Z"/>
+  </g>
+  <!-- window -->
+  <circle cx="512" cy="432" r="64" fill="#6366f1"/>
+</svg>

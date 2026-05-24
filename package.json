@@ -46,12 +46,15 @@
     ],
     "mac": {
       "category": "public.app-category.developer-tools",
+      "icon": "assets/app-icon.png",
       "target": ["dmg", "zip"]
     },
     "win": {
+      "icon": "assets/app-icon.png",
       "target": ["nsis"]
     },
     "linux": {
+      "icon": "assets/app-icon.png",
       "target": ["AppImage"],
       "category": "Development"
     }
