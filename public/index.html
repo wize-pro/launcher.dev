@@ -3160,7 +3160,9 @@ async function saveSettings() {
   const ignoreDirs = ignoreDirsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
   if (devRoots.length === 0) {
-    document.querySelector('#cfg-devRoots-list .dev-root-input')?.classList.add('error');
+    document.querySelectorAll('#cfg-devRoots-list .dev-root-input').forEach(i => i.classList.add('error'));
+    msg.textContent = t('error.devRootsEmpty');
+    msg.className = 'settings-msg err';
     return;
   }
   document.querySelectorAll('#cfg-devRoots-list .dev-root-input').forEach(i => i.classList.remove('error'));
@@ -3197,7 +3199,7 @@ async function saveSettings() {
 // ══ Native folder picker ══════════════════════════════════════════════════
 
 function devRootRowHtml(value) {
-  const v = (value || '').replace(/"/g, '&quot;');
+  const v = escHtml(value || '');
   return `<div class="settings-input-row dev-root-row" style="margin-bottom:6px">
     <input class="settings-input dev-root-input" type="text" value="${v}" placeholder="~/dev" data-i18n-placeholder="settings.devRoots.placeholder" spellcheck="false"/>
     <button class="btn-pick-folder" type="button" onclick="pickFolderIntoRow(this)" data-i18n-title="settings.devRoots.browse" title="Browse…">
@@ -3251,7 +3253,7 @@ async function pickFolderIntoElement(input) {
   } catch { /* silent */ }
 }
 
-async function pickFolderInto(inputId) {
+function pickFolderInto(inputId) {
   pickFolderIntoElement(document.getElementById(inputId));
 }
 
