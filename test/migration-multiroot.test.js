@@ -16,7 +16,7 @@ fs.writeFileSync(SETTINGS, JSON.stringify({
 
 // Requiring the server triggers runMigrations() at startup.
 process.env.PORT = '4461';
-require('../server.js');
+const { server } = require('../server.js');
 
 test('schema-v2 migration converts legacy devRoot to devRoots', () => {
   const saved = JSON.parse(fs.readFileSync(SETTINGS, 'utf8'));
@@ -26,7 +26,6 @@ test('schema-v2 migration converts legacy devRoot to devRoots', () => {
 });
 
 after(() => {
-  const { server } = require('../server.js');
   if (HAD_SETTINGS) {
     fs.copyFileSync(BACKUP, SETTINGS);
     fs.unlinkSync(BACKUP);

@@ -22,9 +22,11 @@ function makeRoot(label) {
   return { root, proj };
 }
 
+let rootA, rootB;
+
 test('scan finds projects across multiple roots', async () => {
-  const a = makeRoot('a');
-  const b = makeRoot('b');
+  const a = rootA = makeRoot('a');
+  const b = rootB = makeRoot('b');
 
   const r = await fetch(BASE + '/api/settings', {
     method: 'POST',
@@ -79,6 +81,8 @@ test('POST /api/settings expands ~ and keeps absolute roots', async () => {
 });
 
 after(() => {
+  if (rootA) fs.rmSync(rootA.root, { recursive: true, force: true });
+  if (rootB) fs.rmSync(rootB.root, { recursive: true, force: true });
   if (HAD_SETTINGS) {
     fs.copyFileSync(BACKUP, SETTINGS);
     fs.unlinkSync(BACKUP);
