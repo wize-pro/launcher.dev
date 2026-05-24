@@ -60,7 +60,6 @@ const ctx = {
   getLastActivity: (dir, hasGit) => gitLib.getLastActivity(dir, hasGit, { ignoreDirs: store.settings.ignoreDirs }),
   resolveIdeExec,
   saveSettings: (data) => settingsLib.saveSettings(SETTINGS_FILE, data),
-  reloadSettings: () => { store.settings = settingsLib.loadSettings(SETTINGS_FILE); return store.settings; },
   saveRegistry: () => registryLib.saveRegistry(PROJECTS_FILE, store.registry),
   saveCategories: () => categoriesLib.saveCategories(CATEGORIES_FILE, store.categories),
   normalizeProject,
