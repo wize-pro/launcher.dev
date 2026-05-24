@@ -191,5 +191,9 @@
   "scan.log.subfoldersMany": "{dir}   ({count} subfolders)",
   "scan.log.doneOne": "{count} project found",
   "scan.log.doneMany": "{count} projects found",
-  "scan.log.unexpectedError": "Error: {msg}"
+  "scan.log.unexpectedError": "Error: {msg}",
+  "launch.log.processExited": "⬛ Process exited (code: {code})",
+  "launch.log.processError": "❌ Error: {msg}",
+  "dialog.pickFolder.title": "Select a folder",
+  "dialog.pickFolder.button": "Choose"
 }

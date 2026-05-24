@@ -907,11 +907,11 @@ app.post('/api/launch', (req, res) => {
   proc.stdout.on('data', d => pushLog('stdout', d));
   proc.stderr.on('data', d => pushLog('stderr', d));
   proc.on('exit', code => {
-    pushLog('system', `\n⬛ Process terminé (code: ${code ?? 'signal'})\n`);
+    pushLog('system', `\n${t('launch.log.processExited', undefined, { code: code ?? 'signal' })}\n`);
     instances.delete(instanceId);
     instance.sseClients.forEach(c => { c.write(`event: exit\ndata: ${JSON.stringify({ code })}\n\n`); c.end(); });
   });
-  proc.on('error', err => pushLog('system', `❌ Erreur: ${err.message}\n`));
+  proc.on('error', err => pushLog('system', `${t('launch.log.processError', undefined, { msg: err.message })}\n`));
 
   res.json({ instanceId, pid: proc.pid });
 });
@@ -1172,10 +1172,10 @@ app.get('/api/pick-folder', async (req, res) => {
     : os.homedir();
 
   const result = await dialog.showOpenDialog({
-    title:       'Sélectionner un dossier',
+    title:       t('dialog.pickFolder.title'),
     defaultPath,
     properties:  ['openDirectory', 'createDirectory'],
-    buttonLabel: 'Choisir',
+    buttonLabel: t('dialog.pickFolder.button'),
   });
 
   if (result.canceled) return res.json({ canceled: true });
