@@ -10,7 +10,7 @@ if (HAD_SETTINGS) fs.copyFileSync(SETTINGS, BACKUP);
 
 process.env.PORT = '4458';
 const { server } = require('../server.js');
-const BASE = 'http://localhost:4458';
+const BASE = 'http://127.0.0.1:4458';
 
 async function setLang(lang) {
   await fetch(BASE + '/api/settings', {
