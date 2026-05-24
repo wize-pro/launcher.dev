@@ -115,9 +115,9 @@ fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 
 ## i18n system
 
-Translations live in `locales/en.json` (the base / source of truth) and `locales/fr.json`. The module `public/i18n.js` exports `translate(catalogs, lang, key, params)` and `detectLang(acceptHeader)` — it is a **shared module** loaded by both the server (`require('./public/i18n.js')`) and the browser (`<script src="/i18n.js">`).
+Translations live in `locales/en.json` (the base / source of truth) and `locales/fr.json`. The module `public/i18n.js` exports `translate(catalogs, lang, key, params)` and `detectLang(navLang, supported)` — it is a **shared module** loaded by both the server (`require('./public/i18n.js')`) and the browser (`<script src="/i18n.js">`).
 
-The server exposes a `t(key, lang, params)` helper used in request handlers and scan logs. The frontend exposes `t(key, params)` (uses the active language) and `applyTranslations()` (updates `data-i18n` elements in the DOM). A language selector in the UI writes the choice to `settings.json` (`lang` field) and also caches it in `localStorage` (`dlLang`). On first launch with no stored preference, the server detects the browser language from the `Accept-Language` header.
+The server exposes a `t(key, lang, params)` helper used in request handlers and scan logs. The frontend exposes `t(key, params)` (uses the active language) and `applyTranslations()` (updates `data-i18n` elements in the DOM). A language selector in the UI writes the choice to `settings.json` (`lang` field) and also caches it in `localStorage` (`dlLang`). On first launch with no stored preference, the frontend detects the browser language via `navigator.language` (`detectLang`), applies it, and POSTs the chosen language to `/api/settings` so the server can localize its own messages.
 
 English is the base — every key must exist in `en.json`. French (`fr.json`) is a translation. To add a language, drop `locales/<code>.json` (include a `_meta.name` key for the display name) — no code change required. The server's `/api/locales` endpoint auto-discovers all files in `locales/`.
 
