@@ -6,7 +6,7 @@ module.exports = {
   devRoot: path.join(os.homedir(), 'dev'),
 
   // Maximum scan depth (1 = direct children, 2 = one sub-folder, etc.)
-  // dev/RAC/IsiracNetApi/isirac-gate = 3 levels → scanDepth 5 for broad coverage
+  // e.g. dev/group/api-project/gateway = 3 levels → scanDepth 5 for broad coverage
   scanDepth: 5,
 
   // Web launcher port (overridable via the PORT env variable)

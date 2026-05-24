@@ -523,8 +523,8 @@ const GENERIC_NAMES = new Set([
 
 // Names that indicate a COMPONENT of a project (frontend/backend/etc.)
 // Only these names trigger multi-component grouping.
-// A folder "RAC" containing projects will NOT be grouped because its sub-folders
-// have business names (BrokerComparator, DevAutomator…), not component names.
+// A folder grouping several independent projects will NOT be grouped, because its
+// sub-folders have business names (e.g. PaymentService, DataPipeline…), not component names.
 const COMPONENT_NAMES = new Set([
   'frontend', 'backend', 'api', 'web', 'client', 'server', 'mobile', 'app',
   'admin', 'worker', 'ui', 'bot', 'jobs', 'gateway', 'proxy', 'auth',
