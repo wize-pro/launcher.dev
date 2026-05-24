@@ -81,6 +81,22 @@ Launcher/
 - **server.js** is self-contained: it runs standalone (`node server.js`) or inside Electron.
 - **The frontend** is a single HTML file, no build step.
 
+## Build installers
+
+Packaging uses [electron-builder](https://www.electron.build/):
+
+```bash
+npm run pack   # unpacked app in dist/ (fast, for testing)
+npm run dist   # installers: .dmg/.zip (macOS), NSIS .exe (Windows), .AppImage (Linux)
+```
+
+Build for the current OS by default; cross-building has the usual electron-builder
+platform requirements. In a packaged build, user data (`projects.json`, `settings.json`,
+…) is stored in the OS per-user data directory — not next to the app — since the app
+bundle is read-only. Builds are unsigned by default; configure code signing via
+electron-builder if you distribute them. A custom app icon can be added at
+`build/icon.icns` / `build/icon.ico` / `build/icon.png` (512×512).
+
 ## Contribution
 
 Contributions are welcome. Open an issue to discuss a significant change before sending a pull request. Please respect the project's philosophy of simplicity (avoid unnecessary dependencies and abstractions).
