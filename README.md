@@ -87,4 +87,4 @@ Contributions are welcome. Open an issue to discuss a significant change before 
 
 ## License
 
-[MIT](./LICENSE) © Hassan Rihan
+[MIT](./LICENSE) © wize-pro
