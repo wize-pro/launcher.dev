@@ -1569,7 +1569,50 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
   </div>
 </div>
 
+<script src="/i18n.js"></script>
 <script>
+// ── i18n ─────────────────────────────────────────────────────────────────────
+let LANG = localStorage.getItem('dlLang') || 'en';
+const CATALOGS = {};
+
+function t(key, params) { return I18n.translate(CATALOGS, LANG, key, params); }
+
+async function loadCatalog(lang) {
+  if (CATALOGS[lang]) return;
+  CATALOGS[lang] = await fetch(`/locales/${lang}.json`).then(r => r.json()).catch(() => ({}));
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.getAttribute('data-i18n-title'));
+  });
+}
+
+async function initI18n() {
+  const locales = await fetch('/api/locales').then(r => r.json()).catch(() => [{ code: 'en' }]);
+  const supported = locales.map(l => l.code);
+  const settings = await fetch('/api/settings').then(r => r.json()).catch(() => ({}));
+  let lang = settings.lang;
+  if (!lang || !supported.includes(lang)) {
+    lang = I18n.detectLang(navigator.language, supported); // first launch: follow the system
+    fetch('/api/settings', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lang }),
+    }).catch(() => {});
+  }
+  LANG = lang;
+  localStorage.setItem('dlLang', lang);
+  await loadCatalog('en');
+  await loadCatalog(lang);
+  applyTranslations();
+}
+
 // ══ State ══════════════════════════════════════════════════════════════════
 let allProjects = [];
 let activeFilter = 'all';
@@ -3716,7 +3759,7 @@ async function initSettings() {
 }
 
 loadCategories();
-initSettings().then(() => loadFavorites()).then(() => loadProjects());
+initI18n().then(() => initSettings()).then(() => loadFavorites()).then(() => loadProjects());
 setInterval(loadProjects, 10000);
 connectEvents();
 
