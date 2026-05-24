@@ -23,18 +23,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
-      - name: Generate ROADMAP.md
+      - name: Update ROADMAP.md (race-safe)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/gen-roadmap.mjs
-      - name: Commit if changed
         run: |
-          if git diff --quiet -- ROADMAP.md; then
-            echo "ROADMAP.md unchanged — nothing to commit."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            # Always regenerate from the latest main so concurrent runs converge.
+            git fetch --quiet origin main
+            git reset --hard --quiet origin/main
+            node scripts/gen-roadmap.mjs
+            if git diff --quiet -- ROADMAP.md; then
+              echo "ROADMAP.md already up to date."
+              exit 0
+            fi
             git add ROADMAP.md
             git commit -m "docs: auto-update ROADMAP.md [skip ci]"
-            git push
-          fi
+            if git push origin HEAD:main; then
+              echo "Pushed ROADMAP.md update."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — re-syncing and retrying."
+          done
+          echo "Failed to update ROADMAP.md after retries." >&2
+          exit 1
