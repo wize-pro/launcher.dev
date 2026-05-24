@@ -1482,13 +1482,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <!-- ══ FILTER BAR ══ -->
 <div class="filter-bar" id="filter-bar">
   <button class="fp active" data-tag="all" onclick="setFilter('all')">
-    Tous <span class="cnt" id="cnt-all">0</span>
+    <span data-i18n="filter.all">All</span> <span class="cnt" id="cnt-all">0</span>
   </button>
   <button class="fp" data-tag="running" onclick="setFilter('running')">
-    <span style="color:var(--gn)">●</span> En cours <span class="cnt" id="cnt-running">0</span>
+    <span style="color:var(--gn)">●</span> <span data-i18n="filter.running.label">Running</span> <span class="cnt" id="cnt-running">0</span>
   </button>
   <button class="fp" data-tag="favorites" onclick="setFilter('favorites')" id="btn-filter-fav" style="display:none">
-    ★ Favoris <span class="cnt" id="cnt-favorites">0</span>
+    <span data-i18n="filter.favorites.label">★ Favorites</span> <span class="cnt" id="cnt-favorites">0</span>
   </button>
   <div class="fp-sep"></div>
   <div id="tag-pills"></div>
@@ -1498,17 +1498,17 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <div class="type-bar" id="type-bar">
   <span class="type-bar-label">Type</span>
   <div id="type-pills" style="display:contents"></div>
-  <button class="type-bar-clear" id="type-bar-clear" onclick="clearTypeFilters()">✕ Effacer</button>
+  <button class="type-bar-clear" id="type-bar-clear" onclick="clearTypeFilters()" data-i18n="type.bar.clear">✕ Clear</button>
 </div>
 
 <!-- ══ CATEGORY BAR ══ -->
 <div class="cat-bar" id="cat-bar">
-  <span class="cat-bar-label">Catégories</span>
+  <span class="cat-bar-label" data-i18n="cat.bar.label">Categories</span>
   <div id="cat-pills" style="display:contents"></div>
-  <button class="cat-bar-clear" id="cat-bar-clear" onclick="clearCatFilters()">✕ Effacer</button>
+  <button class="cat-bar-clear" id="cat-bar-clear" onclick="clearCatFilters()" data-i18n="cat.clear">✕ Clear</button>
   <button class="cat-bar-manage" onclick="openSettings();setTimeout(()=>document.getElementById('settings-cats-section')?.scrollIntoView({behavior:'smooth'}),300)">
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Gérer
+    <span data-i18n="cat.manage">Manage</span>
   </button>
 </div>
 
@@ -1519,13 +1519,13 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <!-- ══ LIST META BAR ══ -->
 <div class="list-meta">
   <span class="list-meta-count" id="list-meta-count"></span>
-  <span class="sort-label">Trier par</span>
+  <span class="sort-label" data-i18n="sort.label">Sort by</span>
   <div class="sort-bar">
     <button class="sort-btn" id="sort-name" onclick="setSort('name')">
-      Nom <span class="sort-arrow" id="sort-name-arrow">↑</span>
+      <span data-i18n="sort.name">Name</span> <span class="sort-arrow" id="sort-name-arrow">↑</span>
     </button>
     <button class="sort-btn active" id="sort-recent" onclick="setSort('recent')">
-      Récent <span class="sort-arrow" id="sort-recent-arrow">↓</span>
+      <span data-i18n="sort.recent">Recent</span> <span class="sort-arrow" id="sort-recent-arrow">↓</span>
     </button>
   </div>
 </div>
@@ -1535,7 +1535,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
   <div class="scan-panel">
     <div class="so-header">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ac)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <div class="so-text" id="so-text">Scan en cours…</div>
+      <div class="so-text" id="so-text" data-i18n="scan.inProgress">Scanning…</div>
       <div class="so-spinner" id="so-spinner"></div>
       <button class="so-close" onclick="closeScan()">✕</button>
     </div>
@@ -1543,7 +1543,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
     <div class="so-results" id="so-results"></div>
     <div class="so-footer" id="so-footer" style="display:none">
       <span id="so-footer-text"></span>
-      <button class="so-import-all" id="so-import-all" onclick="importAllFromScan()">⊕ Importer les nouveaux</button>
+      <button class="so-import-all" id="so-import-all" onclick="importAllFromScan()" data-i18n="scan.importAll">⊕ Import new</button>
     </div>
   </div>
 </div>
@@ -1552,12 +1552,12 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 <div class="port-filter-bar" id="port-filter-bar">
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
   <span id="port-filter-label">Filtrage par port</span>
-  <button class="port-filter-clear" onclick="clearPortFilter()">✕ Effacer le filtre</button>
+  <button class="port-filter-clear" onclick="clearPortFilter()" data-i18n="cat.clear">✕ Clear</button>
 </div>
 
 <!-- ══ MAIN ══ -->
 <main id="main">
-  <div class="empty"><div class="empty-icon">⏳</div>Chargement…</div>
+  <div class="empty"><div class="empty-icon">⏳</div><span data-i18n="main.loading">Loading…</span></div>
 </main>
 
 <!-- ══ TERMINAL ══ -->
@@ -1566,12 +1566,12 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
     <span class="term-label">Terminal</span>
     <div class="term-tabs-wrap" id="term-tabs" onclick="e=>e.stopPropagation()"></div>
     <div class="term-actions" onclick="event.stopPropagation()">
-      <button class="term-btn" onclick="clearTerminal()">Vider</button>
+      <button class="term-btn" onclick="clearTerminal()" data-i18n="terminal.clear">Clear</button>
     </div>
     <span class="term-toggle" id="term-toggle">▼</span>
   </div>
   <div class="term-body" id="term-body">
-    <div class="term-empty">Lancez un projet pour voir les logs ici.</div>
+    <div class="term-empty" data-i18n="terminal.empty">Start a project to see logs here.</div>
   </div>
 </div>
 
@@ -1829,14 +1829,14 @@ function relativeDate(ts) {
   const w  = Math.floor(d / 7);
   const mo = Math.floor(d / 30);
   const y  = Math.floor(d / 365);
-  if (m < 1)   return { label: "à l'instant",  recent: true };
-  if (m < 60)  return { label: `il y a ${m} min`,   recent: true };
-  if (h < 24)  return { label: `il y a ${h}h`,       recent: true };
-  if (d < 2)   return { label: 'hier',                recent: true };
-  if (d < 7)   return { label: `il y a ${d} jours`,  recent: false };
-  if (w < 5)   return { label: `il y a ${w} sem.`,   recent: false };
-  if (mo < 12) return { label: `il y a ${mo} mois`,  recent: false };
-  return       { label: `il y a ${y} an${y>1?'s':''}`, recent: false };
+  if (m < 1)   return { label: t('date.justNow'),                  recent: true };
+  if (m < 60)  return { label: t('date.minutesAgo', { m }),        recent: true };
+  if (h < 24)  return { label: t('date.hoursAgo', { h }),          recent: true };
+  if (d < 2)   return { label: t('date.yesterday'),                 recent: true };
+  if (d < 7)   return { label: t('date.daysAgo', { d }),           recent: false };
+  if (w < 5)   return { label: t('date.weeksAgo', { w }),          recent: false };
+  if (mo < 12) return { label: t('date.monthsAgo', { mo }),        recent: false };
+  return       { label: t('date.yearsAgo', { y, yearPlural: y>1?'s':'' }), recent: false };
 }
 
 function updatePortFilterBanner() {
@@ -2520,7 +2520,7 @@ async function launch(projectId, commandKey, iid) {
       body: JSON.stringify({projectId, commandKey})
     });
     const data = await r.json();
-    if (!r.ok) { alert(data.error||'Erreur'); return; }
+    if (!r.ok) { alert(data.error||t('common.error')); return; }
     await loadProjects();
     openTab(iid);
   } catch(e){ alert(e.message) }
@@ -2595,13 +2595,13 @@ function closeTab(id) {
   }
   renderTabs();
   if (activeTabId) renderTermBody();
-  else document.getElementById('term-body').innerHTML='<div class="term-empty">Lancez un projet pour voir les logs ici.</div>';
+  else document.getElementById('term-body').innerHTML=`<div class="term-empty">${t('terminal.empty')}</div>`;
 }
 
 function renderTermBody() {
   const body = document.getElementById('term-body');
   const tab  = tabs.get(activeTabId);
-  if (!tab) { body.innerHTML='<div class="term-empty">Aucun log.</div>'; return; }
+  if (!tab) { body.innerHTML=`<div class="term-empty">${t('terminal.noLog')}</div>`; return; }
   body.innerHTML = tab.logs.map(l=>termLine(l)).join('');
   body.scrollTop = body.scrollHeight;
 }
@@ -2659,7 +2659,7 @@ function startScan() {
 
   log.innerHTML=''; footer.style.display='none';
   results.innerHTML=''; results.classList.remove('visible');
-  spinner.className='so-spinner'; text.innerHTML='Scan en cours…';
+  spinner.className='so-spinner'; text.innerHTML=t('scan.inProgress');
   overlay.classList.add('open');
   btn.disabled=true; btn.classList.add('spinning');
 
@@ -2684,10 +2684,14 @@ function startScan() {
     const scanProjects = JSON.parse(e.data);
     const newCount = scanProjects.filter(p => !p.imported).length;
     spinner.className='so-spinner done';
-    text.innerHTML=`Scan terminé`;
+    text.innerHTML=t('scan.done');
     footer.style.display='flex';
-    document.getElementById('so-footer-text').innerHTML=
-      `<strong style="color:var(--tx)">${found}</strong> projet${found!==1?'s':''} détecté${found!==1?'s':''} — <strong style="color:${newCount>0?'var(--ac)':'var(--t2)'}">${newCount} nouveau${newCount!==1?'x':''}</strong>`;
+    document.getElementById('so-footer-text').innerHTML= t('scan.footer', {
+        found: `<strong style="color:var(--tx)">${found}</strong>`,
+        foundPlural: found!==1?'s':'',
+        newCount: `<strong style="color:${newCount>0?'var(--ac)':'var(--t2)'}">${newCount}</strong>`,
+        newPlural: newCount!==1?'x':''
+      });
     const importAllBtn = document.getElementById('so-import-all');
     if (newCount > 0) importAllBtn.classList.add('visible');
     else importAllBtn.classList.remove('visible');
@@ -2697,7 +2701,7 @@ function startScan() {
   });
 
   es.onerror = () => {
-    text.innerHTML='<span style="color:var(--rd)">Erreur lors du scan</span>';
+    text.innerHTML=`<span style="color:var(--rd)">${t('scan.error')}</span>`;
     spinner.className='so-spinner done';
     btn.disabled=false; btn.classList.remove('spinning');
     es.close();
@@ -2716,25 +2720,25 @@ function renderScanResults(scanProjectsList) {
   const importedItems = scanProjectsList.filter(p => p.imported);
   let html = '';
   if (newItems.length) {
-    html += `<div class="so-results-header">🆕 Nouveaux (${newItems.length})</div>`;
+    html += `<div class="so-results-header">${t('scan.newHeader', { count: newItems.length })}</div>`;
     html += newItems.map((p, _) => {
       const i = scanProjectsList.indexOf(p);
       const shortPath = p.path.replace(/.*\/dev\//, '~/dev/');
       return `<div class="so-result-item">
         <span class="so-ri-name" title="${escHtml(p.path)}">${escHtml(p.name)}</span>
         <span class="so-ri-path" title="${escHtml(p.path)}">${escHtml(shortPath)}</span>
-        <button class="so-ri-btn" onclick="importFromScan(${i})">⊕ Importer</button>
+        <button class="so-ri-btn" onclick="importFromScan(${i})">${t('scan.importBtn')}</button>
       </div>`;
     }).join('');
   }
   if (importedItems.length) {
-    html += `<div class="so-results-header" style="margin-top:${newItems.length?'0':'0'}">✓ Déjà importés (${importedItems.length})</div>`;
+    html += `<div class="so-results-header" style="margin-top:${newItems.length?'0':'0'}">${t('scan.alreadyHeader', { count: importedItems.length })}</div>`;
     html += importedItems.map(p => {
       const shortPath = p.path.replace(/.*\/dev\//, '~/dev/');
       return `<div class="so-result-item">
         <span class="so-ri-name" title="${escHtml(p.path)}">${escHtml(p.name)}</span>
         <span class="so-ri-path" title="${escHtml(p.path)}">${escHtml(shortPath)}</span>
-        <span class="so-ri-badge imported">✓ Importé</span>
+        <span class="so-ri-badge imported">${t('scan.importedBadge')}</span>
       </div>`;
     }).join('');
   }
@@ -2776,7 +2780,7 @@ async function openEditor(projectId, ideId) {
     if (!r.ok) {
       const d = await r.json();
       const ide = idesList.find(i=>i.id===(ideId||defaultIdeId));
-      alert(`Impossible d'ouvrir ${ide?.name||'l\'éditeur'} : ${d.error}\n\nVérifie que la commande "${ide?.cmd||'code'}" est disponible dans ton PATH.`);
+      alert(t('editor.cantOpen', { name: ide?.name||ide?.cmd||'code', error: d.error, cmd: ide?.cmd||'code' }));
     }
   } catch(e) { alert(e.message); }
 }
@@ -3007,17 +3011,17 @@ function renderSettingsCats() {
   const list = document.getElementById('settings-cat-list');
   if (!list) return;
   if (!allCategories.length) {
-    list.innerHTML = `<p style="font-size:11px;color:var(--t3)">Aucune catégorie. Créez-en une ci-dessous.</p>`;
+    list.innerHTML = `<p style="font-size:11px;color:var(--t3)">${t('cat.noCategories')}</p>`;
     return;
   }
   list.innerHTML = allCategories.map(cat => `
     <div class="cat-settings-row" id="cat-row-${cat.id}">
-      <span class="cat-settings-dot" style="background:${cat.color}" title="Changer la couleur"
+      <span class="cat-settings-dot" style="background:${cat.color}" title="${t('cat.changeColor')}"
         onclick="openColorPicker('${cat.id}',this)"></span>
       <input class="cat-settings-name" value="${escHtml(cat.name)}"
         onblur="renameCat('${cat.id}',this.value)"
         onkeydown="if(event.key==='Enter')this.blur()"/>
-      <button class="cat-settings-del" onclick="deleteCat('${cat.id}')" title="Supprimer">✕</button>
+      <button class="cat-settings-del" onclick="deleteCat('${cat.id}')" title="${t('ide.delete')}">✕</button>
     </div>`).join('');
 }
 
@@ -3053,7 +3057,7 @@ async function renameCat(id, newName) {
 }
 
 async function deleteCat(id) {
-  if (!confirm('Supprimer cette catégorie et ses assignations ?')) return;
+  if (!confirm(t('confirm.deleteCat'))) return;
   await fetch(`/api/categories/${id}`, { method:'DELETE' });
   await loadCategories();
   activeCatFilters.delete(id);
@@ -3156,7 +3160,7 @@ async function saveSettings() {
   document.getElementById('cfg-devRoot').classList.remove('error');
 
   btn.disabled = true;
-  btn.textContent = 'Enregistrement…';
+  btn.textContent = t('common.saving');
   try {
     const r = await fetch('/api/settings', {
       method: 'POST',
@@ -3164,11 +3168,11 @@ async function saveSettings() {
       body: JSON.stringify({ devRoot, scanDepth, ignoreDirs, ides: idesList, defaultIde: defaultIdeId }),
     });
     const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Erreur serveur');
+    if (!r.ok) throw new Error(data.error || t('common.serverError'));
 
-    msg.textContent = '✓ Paramètres sauvegardés';
+    msg.textContent = t('settings.saved');
     msg.className = 'settings-msg ok';
-    btn.textContent = 'Enregistrer et rescanner';
+    btn.textContent = t('settings.save');
     btn.disabled = false;
 
     // Rescan and close after short delay
@@ -3179,7 +3183,7 @@ async function saveSettings() {
   } catch(e) {
     msg.textContent = '✗ ' + e.message;
     msg.className = 'settings-msg err';
-    btn.textContent = 'Enregistrer et rescanner';
+    btn.textContent = t('settings.save');
     btn.disabled = false;
   }
 }
@@ -3320,8 +3324,8 @@ function openImportPanel(opts = {}) {
   form.style.display = 'none';
 
   if (importState.mode === 'new') {
-    title.textContent = 'Importer un projet';
-    submit.textContent = 'Importer';
+    title.textContent = t('import.title');
+    submit.textContent = t('import.save');
     detectSec.style.display = '';
     pathDisplayWrap.style.display = 'none';
     pathInput.value = '';
@@ -3336,8 +3340,8 @@ function openImportPanel(opts = {}) {
     }
   } else {
     // Edit mode
-    title.textContent = 'Modifier le projet';
-    submit.textContent = 'Enregistrer';
+    title.textContent = t('import.titleEdit');
+    submit.textContent = t('import.saveEdit');
     detectSec.style.display = 'none';
     pathDisplayWrap.style.display = '';
 
@@ -3413,13 +3417,13 @@ function renderImportTypeGrid() {
     const isSelected  = selected === type;
     const isAuto      = autoDetected === type;
     const isDisc      = discouraged.includes(type);
-    const starHtml    = isAuto ? `<span class="type-sel-star" title="Type auto-détecté">●</span>` : '';
+    const starHtml    = isAuto ? `<span class="type-sel-star" title="${t('type.autoDetected')}">●</span>` : '';
     const warnHtml    = isDisc && !isSelected ? `<span class="type-sel-warn-icon">⚠</span>` : '';
     const typeColor   = def.color;
     const typeBg      = def.bg;
     return `<button class="type-sel-btn ${isSelected?'active':''} ${isDisc?'discouraged':''}"
       style="--type-color:${typeColor};--type-bg:${typeBg}"
-      title="${def.label}${isDisc?' — inhabituel pour ce stack':''}"
+      title="${def.label}${isDisc?' — '+t('type.uncommonHint'):''}"
       onclick="selectImportType('${type}')">
       ${starHtml}
       <span style="color:${isSelected?typeColor:'var(--t3)'};">${def.svg}</span>
@@ -3431,7 +3435,7 @@ function renderImportTypeGrid() {
   // Warning if selected type is discouraged
   if (discouraged.includes(selected) && selected !== 'unknown') {
     const def = PROJECT_TYPES[selected];
-    warnEl.textContent = `⚠ "${def?.label}" est inhabituel pour le stack détecté. Confirmez si c'est intentionnel.`;
+    warnEl.textContent = t('type.uncommon', { type: def?.label || selected });
     warnEl.classList.add('visible');
   } else {
     warnEl.classList.remove('visible');
@@ -3466,14 +3470,14 @@ function makeCommandRow(data = {}) {
   const row = document.createElement('div');
   row.className = 'cmd-row';
   row.innerHTML = `
-    <input class="cmd-key"   placeholder="clé"      value="${escHtml(data.key||'')}"   title="Identifiant (ex: dev, start)"/>
+    <input class="cmd-key"   placeholder="${t('cmd.key.placeholder')}"   value="${escHtml(data.key||'')}"   title="${t('cmd.key.title')}"/>
     <span class="cmd-row-sep">·</span>
-    <input class="cmd-label" placeholder="label"    value="${escHtml(data.label||'')}" title="Texte affiché sur le bouton"/>
+    <input class="cmd-label" placeholder="label"    value="${escHtml(data.label||'')}" title="${t('cmd.label.title')}"/>
     <span class="cmd-row-sep">·</span>
-    <input class="cmd-cmd"   placeholder="commande" value="${escHtml(data.cmd||'')}"   title="Commande shell à exécuter"/>
+    <input class="cmd-cmd"   placeholder="command"  value="${escHtml(data.cmd||'')}"   title="${t('cmd.cmd.title')}"/>
     <span class="cmd-row-sep">:</span>
-    <input class="cmd-port"  placeholder="port"     value="${escHtml(String(data.port||''))}" title="Port (optionnel)" type="number" min="1" max="65535"/>
-    <button class="cmd-del" onclick="this.closest('.cmd-row').remove()" title="Supprimer">✕</button>`;
+    <input class="cmd-port"  placeholder="port"     value="${escHtml(String(data.port||''))}" title="${t('cmd.port.title')}" type="number" min="1" max="65535"/>
+    <button class="cmd-del" onclick="this.closest('.cmd-row').remove()" title="${t('cmd.del.title')}">✕</button>`;
   return row;
 }
 
@@ -3525,7 +3529,7 @@ function renderComponentPicker() {
 
   // Active chips (selected components)
   if (selected.size === 0) {
-    activeEl.innerHTML = '<span class="comp-active-empty">Aucun composant sélectionné</span>';
+    activeEl.innerHTML = `<span class="comp-active-empty">${t('import.components.empty')}</span>`;
   } else {
     activeEl.innerHTML = [...selected].map(comp => {
       const kc = KNOWN_COMPONENTS[comp];
@@ -3535,7 +3539,7 @@ function renderComponentPicker() {
         style="color:${color};background:${color}18;border-color:${color}40"
         onclick="toggleComponent('${comp}')">
         ${label}
-        <button class="cc-del" onclick="event.stopPropagation();toggleComponent('${comp}')" title="Retirer">✕</button>
+        <button class="cc-del" onclick="event.stopPropagation();toggleComponent('${comp}')" title="${t('cmd.remove.title')}">✕</button>
       </span>`;
     }).join('');
   }
@@ -3589,7 +3593,7 @@ function renderImportCatPicker() {
   if (!listEl) return;
 
   if (!allCategories.length) {
-    listEl.innerHTML = '<span style="font-size:11px;color:var(--t3);font-style:italic">Aucune catégorie. Créez-en dans les paramètres.</span>';
+    listEl.innerHTML = `<span style="font-size:11px;color:var(--t3);font-style:italic">${t('cat.noCategoriesImport')}</span>`;
     return;
   }
 
@@ -3645,7 +3649,7 @@ async function detectImportProject() {
     });
     const data = await r.json();
     if (!r.ok) {
-      msg.textContent = data.error || 'Erreur';
+      msg.textContent = data.error || t('common.error');
       msg.className = 'import-msg err';
       return;
     }
@@ -3661,7 +3665,7 @@ async function detectImportProject() {
     msg.className = 'import-msg err';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Détecter';
+    btn.textContent = t('import.detect');
   }
 }
 
@@ -3672,7 +3676,7 @@ async function saveImport() {
   const { name, description, components, color, commands, type } = getImportFormData();
   if (!name) {
     document.getElementById('import-name').focus();
-    msg.textContent = 'Le nom est obligatoire';
+    msg.textContent = t('import.nameRequired');
     msg.className = 'import-msg err';
     return;
   }
@@ -3687,7 +3691,7 @@ async function saveImport() {
     if (importState.mode === 'new') {
       const dirPath = document.getElementById('import-path-input').value.trim();
       if (!dirPath) {
-        msg.textContent = 'Chemin requis';
+        msg.textContent = t('import.pathRequired');
         msg.className = 'import-msg err';
         return;
       }
@@ -3702,9 +3706,9 @@ async function saveImport() {
         document.getElementById('import-dup-warn').classList.add('visible');
         return;
       }
-      if (!r.ok) throw new Error(data.error || 'Erreur serveur');
+      if (!r.ok) throw new Error(data.error || t('common.serverError'));
       savedProjectId = data.id;
-      msg.textContent = '✓ Projet importé avec succès';
+      msg.textContent = t('import.success');
       msg.className = 'import-msg ok';
     } else {
       const r = await fetch(`/api/projects/${importState.projectId}`, {
@@ -3712,8 +3716,8 @@ async function saveImport() {
         body: JSON.stringify({ name, description, components, color, commands, type }),
       });
       const data = await r.json();
-      if (!r.ok) throw new Error(data.error || 'Erreur serveur');
-      msg.textContent = '✓ Projet mis à jour';
+      if (!r.ok) throw new Error(data.error || t('common.serverError'));
+      msg.textContent = t('import.updated');
       msg.className = 'import-msg ok';
     }
 
@@ -3744,7 +3748,7 @@ async function saveImport() {
     msg.className = 'import-msg err';
   } finally {
     submit.disabled = false;
-    submit.textContent = importState.mode === 'new' ? 'Importer' : 'Enregistrer';
+    submit.textContent = importState.mode === 'new' ? t('import.save') : t('import.saveEdit');
   }
 }
 
@@ -3755,10 +3759,10 @@ function editProject(projectId) {
 
 async function deleteProject(projectId, projectName, event) {
   event?.stopPropagation();
-  if (!confirm(`Supprimer "${projectName}" du registre ?\n\nLe dossier ne sera pas supprimé, seulement retiré de Dev Launcher.`)) return;
+  if (!confirm(t('confirm.deleteProject', { name: projectName }))) return;
   try {
     const r = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
-    if (!r.ok) { const d = await r.json(); alert(d.error || 'Erreur'); return; }
+    if (!r.ok) { const d = await r.json(); alert(d.error || t('common.error')); return; }
     await loadProjects();
   } catch(e) { alert(e.message); }
 }
