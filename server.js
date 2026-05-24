@@ -6,6 +6,36 @@ const os = require('os');
 const { spawn, spawnSync } = require('child_process');
 const config = require('./launcher.config');
 const pkg = require('./package.json');
+const i18n = require('./public/i18n.js');
+
+// ─── Locale catalogs ───────────────────────────────────────────────────────────
+const LOCALES_DIR = path.join(__dirname, 'locales');
+
+function loadCatalogs() {
+  const catalogs = {};
+  try {
+    for (const f of fs.readdirSync(LOCALES_DIR)) {
+      if (!f.endsWith('.json')) continue;
+      const code = f.replace(/\.json$/, '');
+      try {
+        catalogs[code] = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, f), 'utf8'));
+      } catch (e) {
+        console.warn(`Failed to parse locale ${f}: ${e.message}`);
+      }
+    }
+  } catch (e) {
+    console.warn(`Cannot read locales directory: ${e.message}`);
+  }
+  if (!catalogs.en) catalogs.en = {};
+  return catalogs;
+}
+
+let catalogs = loadCatalogs();
+
+// Translate a key using the given language (defaults to the active settings language).
+function t(key, lang, params) {
+  return i18n.translate(catalogs, lang || settings.lang || 'en', key, params);
+}
 
 const app = express();
 app.use(express.json());
@@ -33,6 +63,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/locales', express.static(LOCALES_DIR));
 
 // ─── Settings (persistées dans settings.json) ─────────────────────────────────
 
@@ -1186,6 +1217,13 @@ app.get('/api/port-check/:port', (req, res) => {
   const tester = net.createConnection({ port, host: '127.0.0.1' });
   tester.once('connect', () => { tester.destroy(); res.json({ inUse: true, port }); });
   tester.once('error',   () => { res.json({ inUse: false, port }); });
+});
+
+app.get('/api/locales', (req, res) => {
+  res.json(Object.keys(catalogs).map(code => ({
+    code,
+    name: catalogs[code]['_meta.name'] || code,
+  })));
 });
 
 app.get('/api/version', (req, res) => {
