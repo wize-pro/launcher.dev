@@ -1,0 +1,8 @@
+{
+  "_meta.name": "English",
+  "settings.title": "Settings",
+  "settings.about": "About",
+  "settings.language.label": "Language",
+  "about.version": "Dev Launcher v{version} · development build (pre-1.0, may include breaking changes)",
+  "error.projectNotFound": "Project not found"
+}

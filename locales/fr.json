@@ -1,0 +1,8 @@
+{
+  "_meta.name": "Français",
+  "settings.title": "Paramètres",
+  "settings.about": "À propos",
+  "settings.language.label": "Langue",
+  "about.version": "Dev Launcher v{version} · version de développement (pré-1.0, peut contenir des changements cassants)",
+  "error.projectNotFound": "Projet introuvable"
+}
