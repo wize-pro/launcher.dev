@@ -1227,24 +1227,24 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
-    <input id="search" type="text" placeholder="Rechercher un projet…" oninput="renderProjects()"/>
+    <input id="search" type="text" placeholder="Search a project…" data-i18n-placeholder="header.search.placeholder" oninput="renderProjects()"/>
     <span class="search-kbd">R</span>
   </div>
 
   <div class="header-right">
-    <span class="running-badge" id="running-badge">en cours</span>
+    <span class="running-badge" id="running-badge" data-i18n="header.running">running</span>
     <button class="btn-scan" id="btn-add" onclick="openImportPanel({mode:'new'})"
       style="background:var(--s2);border:1px solid var(--bd);color:var(--t2);margin-right:2px;font-weight:500"
       onmouseover="this.style.background='var(--s3)';this.style.color='var(--tx)'"
       onmouseout="this.style.background='var(--s2)';this.style.color='var(--t2)'"
-      title="Ajouter un projet manuellement">
+      title="Add a project manually" data-i18n-title="header.add.title">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Ajouter
+      <span data-i18n="header.add.label">Add</span>
     </button>
     <button class="btn-scan" id="btn-scan" onclick="startScan()">
       <span class="icon">⟳</span> Scan
     </button>
-    <button class="btn-settings" id="btn-theme" onclick="toggleTheme()" title="Changer de thème">
+    <button class="btn-settings" id="btn-theme" onclick="toggleTheme()" title="Change theme" data-i18n-title="header.theme.title">
       <!-- Lune : visible en mode dark -->
       <svg class="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -1258,7 +1258,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
       </svg>
     </button>
-    <button class="btn-settings" id="btn-settings" onclick="openSettings()" title="Paramètres (⌘,)">
+    <button class="btn-settings" id="btn-settings" onclick="openSettings()" title="Settings (⌘,)" data-i18n-title="header.settings.title">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
@@ -1271,46 +1271,46 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
   <div class="settings-panel" id="settings-panel">
     <div class="settings-header">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ac)"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="settings-title">Paramètres</span>
+      <span class="settings-title" data-i18n="settings.title">Settings</span>
       <button class="settings-close" onclick="closeSettings()">✕</button>
     </div>
     <div class="settings-body">
 
       <div class="settings-section">
-        <div class="settings-section-title">Scan des projets</div>
+        <div class="settings-section-title" data-i18n="settings.scan.section">Project scan</div>
 
         <div class="settings-field">
-          <label class="settings-label">Dossier racine des projets</label>
+          <label class="settings-label" data-i18n="settings.devRoot.label">Projects root folder</label>
           <div class="settings-input-row">
-            <input class="settings-input" id="cfg-devRoot" type="text" placeholder="~/dev" spellcheck="false"/>
-            <button class="btn-pick-folder" onclick="pickFolderInto('cfg-devRoot')" title="Parcourir…">
+            <input class="settings-input" id="cfg-devRoot" type="text" placeholder="~/dev" data-i18n-placeholder="settings.devRoot.placeholder" spellcheck="false"/>
+            <button class="btn-pick-folder" onclick="pickFolderInto('cfg-devRoot')" title="Browse…" data-i18n-title="settings.devRoot.browse">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
           </div>
-          <span class="settings-hint">Chemin absolu ou avec ~. Tous les projets seront cherchés à l'intérieur de ce dossier.</span>
+          <span class="settings-hint" data-i18n="settings.devRoot.hint">Absolute path or with ~. All projects will be searched inside this folder.</span>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Profondeur de scan</label>
+          <label class="settings-label" data-i18n="settings.scanDepth.label">Scan depth</label>
           <input class="settings-input" id="cfg-scanDepth" type="number" min="1" max="10" style="width:80px"/>
-          <span class="settings-hint">Nombre de niveaux de sous-dossiers à explorer (1–10). Plus élevé = scan plus lent.</span>
+          <span class="settings-hint" data-i18n="settings.scanDepth.hint">Number of subfolder levels to explore (1–10). Higher = slower scan.</span>
         </div>
 
         <div class="settings-field">
-          <label class="settings-label">Dossiers ignorés</label>
+          <label class="settings-label" data-i18n="settings.ignoreDirs.label">Ignored folders</label>
           <input class="settings-input" id="cfg-ignoreDirs" type="text" placeholder="node_modules, .git, dist…" spellcheck="false"/>
-          <span class="settings-hint">Séparés par des virgules. Ces dossiers sont ignorés lors du scan.</span>
+          <span class="settings-hint" data-i18n="settings.ignoreDirs.hint">Comma-separated. These folders are ignored during scan.</span>
         </div>
       </div>
 
       <!-- IDE management -->
       <div class="settings-section" id="settings-ides-section">
-        <div class="settings-section-title">Éditeurs de code</div>
+        <div class="settings-section-title" data-i18n="settings.ides.section">Code editors</div>
         <div id="settings-ide-list" style="display:flex;flex-direction:column;gap:5px"></div>
 
         <div style="display:flex;gap:6px;margin-top:4px;align-items:center">
           <select class="settings-input" id="ide-preset-select" style="flex:1" onchange="onIdePresetChange()">
-            <option value="">Ajouter un éditeur…</option>
+            <option value="" data-i18n="settings.ide.addPreset">Add an editor…</option>
             <option value="vscode">VS Code</option>
             <option value="cursor">Cursor</option>
             <option value="windsurf">Windsurf</option>
@@ -1320,9 +1320,9 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
             <option value="idea">IntelliJ IDEA</option>
             <option value="pycharm">PyCharm</option>
             <option value="sublime">Sublime Text</option>
-            <option value="custom">Personnalisé…</option>
+            <option value="custom" data-i18n="settings.ide.custom">Custom…</option>
           </select>
-          <button class="settings-browse" onclick="addIdeFromPreset()">Ajouter</button>
+          <button class="settings-browse" onclick="addIdeFromPreset()" data-i18n="settings.ide.add">Add</button>
         </div>
 
         <div id="ide-custom-row" style="display:none;gap:6px;margin-top:4px;flex-direction:column">
@@ -1333,11 +1333,11 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 
       <!-- Categories management -->
       <div class="settings-section" id="settings-cats-section">
-        <div class="settings-section-title">Catégories fonctionnelles</div>
+        <div class="settings-section-title" data-i18n="settings.cats.section">Functional categories</div>
         <div id="settings-cat-list" style="display:flex;flex-direction:column;gap:6px"></div>
         <div style="display:flex;gap:8px;margin-top:4px">
-          <input class="settings-input" id="new-cat-name" type="text" placeholder="Nom de la catégorie…" style="flex:1" onkeydown="if(event.key==='Enter')addCategoryFromSettings()"/>
-          <button class="settings-browse" onclick="addCategoryFromSettings()">+ Ajouter</button>
+          <input class="settings-input" id="new-cat-name" type="text" placeholder="Category name…" data-i18n-placeholder="settings.cats.placeholder" style="flex:1" onkeydown="if(event.key==='Enter')addCategoryFromSettings()"/>
+          <button class="settings-browse" onclick="addCategoryFromSettings()" data-i18n="settings.cats.add">+ Add</button>
         </div>
       </div>
 
@@ -1358,8 +1358,8 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
       <div style="flex:1;display:flex;flex-direction:column;gap:6px">
         <div class="settings-msg" id="settings-msg"></div>
         <div style="display:flex;gap:8px">
-          <button class="settings-cancel" onclick="closeSettings()">Annuler</button>
-          <button class="settings-save" id="settings-save" onclick="saveSettings()">Enregistrer et rescanner</button>
+          <button class="settings-cancel" onclick="closeSettings()" data-i18n="settings.cancel">Cancel</button>
+          <button class="settings-save" id="settings-save" onclick="saveSettings()" data-i18n="settings.save">Save and rescan</button>
         </div>
       </div>
     </div>
