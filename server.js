@@ -628,8 +628,8 @@ function scanProjects(push) {
 
     if (subdirs.length >= 2) {
       // Only group if sub-folders have recognized COMPONENT names
-      // (frontend, backend, api…). This avoids grouping "category" folders
-      // like RAC/ which contains independent projects.
+      // (frontend, backend, api…). This avoids grouping a "category" folder
+      // that merely contains several unrelated projects.
       const componentCandidates = subdirs.filter(sd =>
         COMPONENT_NAMES.has(sd.name.toLowerCase())
       );

@@ -35,3 +35,6 @@ Thumbs.db
 # Editors
 .idea/
 *.swp
+
+# Internal design notes (not published)
+docs/superpowers/
