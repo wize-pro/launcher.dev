@@ -42,18 +42,18 @@ function t(key, lang, params) {
 const app = express();
 app.use(express.json());
 
-// ─── Sécurité ─────────────────────────────────────────────────────────────────
-// ⚠️ Cet outil exécute des commandes shell arbitraires (/api/launch). Il ne doit
-// JAMAIS être exposé sur le réseau. Deux garde-fous :
-//   1. Le serveur écoute uniquement sur la loopback (voir app.listen plus bas).
-//   2. On rejette toute requête dont l'en-tête Host ne désigne pas la machine
-//      locale — protège contre les attaques par DNS rebinding (un site malveillant
-//      ouvert dans le navigateur ne peut pas piloter le launcher).
+// ─── Security ─────────────────────────────────────────────────────────────────
+// ⚠️ This tool executes arbitrary shell commands (/api/launch). It must
+// NEVER be exposed on the network. Two safeguards:
+//   1. The server listens only on the loopback interface (see app.listen below).
+//   2. Any request whose Host header does not refer to the local machine is
+//      rejected — protects against DNS rebinding attacks (a malicious website
+//      open in the browser cannot control the launcher).
 const ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1']);
 
 function hostnameOf(hostHeader) {
   const h = (hostHeader || '').trim();
-  if (h.startsWith('[')) return h.slice(0, h.indexOf(']') + 1); // IPv6 littéral : [::1]
+  if (h.startsWith('[')) return h.slice(0, h.indexOf(']') + 1); // IPv6 literal: [::1]
   return h.split(':')[0];
 }
 
@@ -67,11 +67,11 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/locales', express.static(LOCALES_DIR));
 
-// ─── Settings (persistées dans settings.json) ─────────────────────────────────
+// ─── Settings (persisted in settings.json) ────────────────────────────────────
 
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 
-// Valeurs par défaut issues de launcher.config.js
+// Default values from launcher.config.js
 const SETTINGS_DEFAULTS = {
   devRoot:    config.devRoot,
   scanDepth:  config.scanDepth,
@@ -84,15 +84,15 @@ const SETTINGS_DEFAULTS = {
   defaultIde: 'vscode',
   // Active UI/server language (locale code). null = not chosen yet → client detects it.
   lang: null,
-  // Version du schéma des données persistées (gère les migrations). Voir runMigrations().
+  // Persisted data schema version (handles migrations). See runMigrations().
   schemaVersion: 1,
 };
 
-// Version courante du schéma de données. Incrémenter à chaque évolution du format
-// des fichiers JSON, et ajouter une étape dans MIGRATIONS ci-dessous.
+// Current data schema version. Increment on every change to the JSON file format,
+// and add a corresponding step in MIGRATIONS below.
 const CURRENT_SCHEMA_VERSION = SETTINGS_DEFAULTS.schemaVersion;
 
-// Chemins candidats connus par plateforme pour chaque IDE
+// Known per-platform candidate paths for each IDE
 const HOME     = os.homedir();
 const PLATFORM = process.platform; // 'darwin' | 'win32' | 'linux'
 const PFILES   = process.env['ProgramFiles'] || 'C:\\Program Files';
@@ -159,7 +159,7 @@ function loadSettings() {
       return { ...SETTINGS_DEFAULTS, ...raw };
     }
   } catch (e) {
-    console.warn('⚠️  Impossible de lire settings.json :', e.message);
+    console.warn('⚠️  Cannot read settings.json:', e.message);
   }
   return { ...SETTINGS_DEFAULTS };
 }
@@ -169,7 +169,7 @@ function saveSettings(data) {
   for (const key of Object.keys(SETTINGS_DEFAULTS)) {
     if (data[key] !== undefined) toSave[key] = data[key];
   }
-  // Validation ides
+  // Validate ides
   if (toSave.ides && (!Array.isArray(toSave.ides) || toSave.ides.some(i => !i.id || !i.name || !i.cmd))) {
     delete toSave.ides;
   }
@@ -177,10 +177,10 @@ function saveSettings(data) {
   return toSave;
 }
 
-// Settings actives (mutable en cours d'exécution)
+// Active settings (mutable at runtime)
 let settings = loadSettings();
 
-// ─── Categories (persistées dans categories.json) ─────────────────────────────
+// ─── Categories (persisted in categories.json) ────────────────────────────────
 
 const CATEGORIES_FILE = path.join(__dirname, 'categories.json');
 
@@ -189,7 +189,7 @@ function loadCategories() {
     if (fs.existsSync(CATEGORIES_FILE))
       return JSON.parse(fs.readFileSync(CATEGORIES_FILE, 'utf8'));
   } catch (e) {
-    console.warn('⚠️  Impossible de lire categories.json :', e.message);
+    console.warn('⚠️  Cannot read categories.json:', e.message);
   }
   return { categories: [], assignments: {} };
 }
@@ -200,7 +200,7 @@ function persistCategories() {
 
 let categoriesData = loadCategories();
 
-// ─── Project Registry (source de vérité) ─────────────────────────────────────
+// ─── Project Registry (source of truth) ──────────────────────────────────────
 
 const PROJECTS_FILE = path.join(__dirname, 'projects.json');
 
@@ -209,7 +209,7 @@ function loadRegistry() {
     if (fs.existsSync(PROJECTS_FILE))
       return JSON.parse(fs.readFileSync(PROJECTS_FILE, 'utf8'));
   } catch (e) {
-    console.warn('⚠️  Impossible de lire projects.json :', e.message);
+    console.warn('⚠️  Cannot read projects.json:', e.message);
   }
   return [];
 }
@@ -220,12 +220,12 @@ function saveRegistry() {
 
 let registry = loadRegistry();
 
-// ─── Schéma des données & migrations ──────────────────────────────────────────
+// ─── Data schema & migrations ─────────────────────────────────────────────────
 
-// Ramène un projet au schéma canonique courant :
-//   components = stack technique · type = type manuel · subProjects = sous-projets
-// Absorbe les anciens champs (tags, typeOverride, components structurels d'un multi).
-// Idempotente : appliquer plusieurs fois ne change rien.
+// Normalizes a project to the current canonical schema:
+//   components = tech stack · type = manual type · subProjects = sub-projects
+// Absorbs legacy fields (tags, typeOverride, structural components of a multi-project).
+// Idempotent: applying multiple times has no effect.
 function normalizeProject(p) {
   const isOldMulti = p.source === 'multi' && !p.subProjects;
   const components = isOldMulti
@@ -237,7 +237,7 @@ function normalizeProject(p) {
   return { ...rest, components, subProjects, type };
 }
 
-// Migration v1 : réécrit le registre au schéma canonique (supprime tags/typeOverride).
+// Migration v1: rewrites the registry to the canonical schema (removes tags/typeOverride).
 function migrateRegistryToCanonical() {
   let changed = false;
   registry = registry.map(p => {
@@ -252,8 +252,8 @@ const MIGRATIONS = {
   1: migrateRegistryToCanonical,
 };
 
-// Lit la version de schéma réellement stockée dans settings.json (sans le merge
-// des valeurs par défaut), pour distinguer un fichier legacy d'une install neuve.
+// Reads the schema version actually stored in settings.json (without merging defaults),
+// to distinguish a legacy file from a fresh install.
 function rawSchemaVersion() {
   try {
     if (fs.existsSync(SETTINGS_FILE)) {
@@ -261,28 +261,28 @@ function rawSchemaVersion() {
       return Number.isInteger(raw.schemaVersion) ? raw.schemaVersion : 0;
     }
   } catch {}
-  return null; // pas de fichier settings
+  return null; // no settings file
 }
 
 function runMigrations() {
   const rawV = rawSchemaVersion();
   let from;
   if (rawV === null) {
-    // Pas de settings.json : install neuve (rien à migrer) sauf si un projects.json
-    // legacy traîne déjà → on part de 0 pour le normaliser.
+    // No settings.json: fresh install (nothing to migrate) unless a legacy projects.json
+    // already exists → start from 0 to normalize it.
     from = fs.existsSync(PROJECTS_FILE) ? 0 : CURRENT_SCHEMA_VERSION;
   } else {
     from = rawV;
   }
 
   if (from < CURRENT_SCHEMA_VERSION) {
-    console.log(`[migration] schéma de données ${from} → ${CURRENT_SCHEMA_VERSION}`);
+    console.log(`[migration] data schema ${from} → ${CURRENT_SCHEMA_VERSION}`);
     for (let v = from + 1; v <= CURRENT_SCHEMA_VERSION; v++) {
-      if (MIGRATIONS[v]) { MIGRATIONS[v](); console.log(`[migration] étape v${v} appliquée`); }
+      if (MIGRATIONS[v]) { MIGRATIONS[v](); console.log(`[migration] step v${v} applied`); }
     }
   }
 
-  // Toujours estampiller la version courante dans settings.json
+  // Always stamp the current version into settings.json
   settings.schemaVersion = CURRENT_SCHEMA_VERSION;
   saveSettings(settings);
   settings = loadSettings();
@@ -294,9 +294,9 @@ runMigrations();
 
 const instances = new Map();
 
-// ─── Auto-détection des types de projets ─────────────────────────────────────
+// ─── Auto-detection of project types ─────────────────────────────────────────
 
-// Déduit le type principal d'un projet à partir de ses composants technologiques
+// Infers the main project type from its technology components
 function suggestProjectType(components) {
   const s = new Set(Array.isArray(components) ? components : []);
   if (s.has('multi'))                                                     return 'multi';
@@ -318,8 +318,8 @@ function suggestProjectType(components) {
 }
 
 // ─── Makefile parser ─────────────────────────────────────────────────────────
-// Extrait les cibles Make exposées (.PHONY ou cibles simples) avec leurs descriptions
-// Issues de commentaires ## sur la même ligne ou la ligne précédente.
+// Extracts exposed Make targets (.PHONY or simple targets) with their descriptions
+// taken from ## comments on the same line or the preceding line.
 function parseMakefileCommands(dir) {
   const makefile = path.join(dir, 'Makefile');
   if (!fs.existsSync(makefile)) return null;
@@ -329,13 +329,13 @@ function parseMakefileCommands(dir) {
 
   const lines = content.split('\n');
 
-  // Chercher les cibles .PHONY déclarées (gestion des déclarations multi-lignes avec \)
+  // Find declared .PHONY targets (handle multi-line declarations with \)
   const phonyTargets = new Set();
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^\.PHONY\s*:\s*(.+)/);
     if (!m) continue;
     let phonyLine = m[1];
-    // Suivre les lignes de continuation
+    // Follow continuation lines
     while (phonyLine.trimEnd().endsWith('\\')) {
       phonyLine = phonyLine.trimEnd().slice(0, -1);
       i++;
@@ -349,18 +349,18 @@ function parseMakefileCommands(dir) {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    // Cible Make : nom suivi de ':'  (pas de tabulation en début, pas de variable)
+    // Make target: name followed by ':'  (no leading tab, no variable)
     const targetMatch = line.match(/^([a-zA-Z0-9_][a-zA-Z0-9_\-.]*):/);
     if (!targetMatch) continue;
 
     const target = targetMatch[1];
     if (SKIP.has(target)) continue;
-    // Si .PHONY est déclaré, se limiter à ces cibles uniquement
+    // If .PHONY is declared, restrict to those targets only
     if (phonyTargets.size > 0 && !phonyTargets.has(target)) continue;
-    // Ignorer les cibles internes (commençant par _ ou contenant %)
+    // Ignore internal targets (starting with _ or containing %)
     if (target.startsWith('_') || target.includes('%')) continue;
 
-    // Description : commentaire ## sur la même ligne ou ligne précédente
+    // Description: ## comment on the same line or the preceding line
     let description = '';
     const inlineComment = line.match(/##\s*(.+)$/);
     if (inlineComment) {
@@ -384,9 +384,9 @@ function detectProject(dir, entries) {
   const allCommands = {};
   let color = null;
 
-  // .launcher.yml → prise en charge séparément (priorité absolue)
+  // .launcher.yml → handled separately (absolute priority)
 
-  // Docker Compose — composant additif (un projet peut être web ET docker)
+  // Docker Compose — additive component (a project can be both web AND docker)
   if (names.has('docker-compose.yml') || names.has('docker-compose.yaml')) {
     const composeFile = names.has('docker-compose.yml') ? 'docker-compose.yml' : 'docker-compose.yaml';
     components.push('docker');
@@ -398,7 +398,7 @@ function detectProject(dir, entries) {
     if (!color) color = '#0ea5e9';
   }
 
-  // .NET — solution ou projet
+  // .NET — solution or project
   const slnFile  = entries.find(e => e.name.endsWith('.sln'));
   const csprojFile = entries.find(e => e.name.endsWith('.csproj'));
   if (slnFile || csprojFile) {
@@ -412,7 +412,7 @@ function detectProject(dir, entries) {
     if (!color) color = '#7c3aed';
   }
 
-  // Node.js / Frontend
+  // Node.js / Front-end
   if (names.has('package.json')) {
     let pkgScripts = {};
     let pkgAllDeps = {};
@@ -434,7 +434,7 @@ function detectProject(dir, entries) {
       nodeCommands.install = { label: 'npm install', cmd: 'npm install' };
     }
 
-    // Détecter le port si Vite / Next / etc.
+    // Detect port for Vite / Next / etc.
     let port = null;
     if (pkgScripts.dev?.includes('vite') || names.has('vite.config.ts') || names.has('vite.config.js')) port = 5173;
     else if (names.has('next.config.js') || names.has('next.config.ts')) port = 3000;
@@ -495,7 +495,7 @@ function detectProject(dir, entries) {
     const makeCommands = parseMakefileCommands(dir);
     if (makeCommands) {
       components.push('make');
-      // Commandes Make en premier, puis les autres
+      // Make commands first, then the rest
       const reordered = { ...makeCommands, ...allCommands };
       Object.keys(allCommands).forEach(k => delete allCommands[k]);
       Object.assign(allCommands, reordered);
@@ -515,29 +515,29 @@ function detectProject(dir, entries) {
 
 // ─── Scanner ──────────────────────────────────────────────────────────────────
 
-// Noms de dossiers génériques qui ne doivent pas être utilisés comme nom de projet
+// Generic folder names that should not be used as a project name
 const GENERIC_NAMES = new Set([
   'src', 'app', 'source', 'lib', 'libs', 'core', 'main', 'pkg', 'packages',
   'server', 'client', 'web', 'api', 'code', 'project', 'solution',
 ]);
 
-// Noms qui signalent un COMPOSANT d'un projet (frontend/backend/etc.)
-// Seuls ces noms déclenchent le groupage multi-composants.
-// Un dossier "RAC" avec des projets dedans NE sera PAS groupé car ses sous-dossiers
-// ont des noms métier (BrokerComparator, DevAutomator…), pas des noms de composants.
+// Names that indicate a COMPONENT of a project (frontend/backend/etc.)
+// Only these names trigger multi-component grouping.
+// A folder "RAC" containing projects will NOT be grouped because its sub-folders
+// have business names (BrokerComparator, DevAutomator…), not component names.
 const COMPONENT_NAMES = new Set([
   'frontend', 'backend', 'api', 'web', 'client', 'server', 'mobile', 'app',
   'admin', 'worker', 'ui', 'bot', 'jobs', 'gateway', 'proxy', 'auth',
   'dashboard', 'landing', 'docs', 'storybook', 'e2e', 'functions', 'lambda',
 ]);
 
-// Retourne le meilleur nom à afficher pour un dossier
-// Si le nom est générique, remonte au parent
+// Returns the best display name for a folder.
+// If the name is generic, climbs up to the parent.
 function smartName(dir) {
   const name = path.basename(dir);
   if (GENERIC_NAMES.has(name.toLowerCase())) {
     const parentName = path.basename(path.dirname(dir));
-    // Ne pas remonter si le parent est la racine dev ou un autre nom générique
+    // Don't climb up if the parent is the dev root or another generic name
     if (parentName && !GENERIC_NAMES.has(parentName.toLowerCase())) {
       return parentName;
     }
@@ -545,10 +545,10 @@ function smartName(dir) {
   return name;
 }
 
-// Tente de résoudre la config d'un sous-dossier (pour groupage multi-composants)
-// Retourne { name, components, commands, color, source } ou null
+// Tries to resolve the config of a sub-folder (for multi-component grouping).
+// Returns { name, components, commands, color, source } or null.
 function resolveComponent(sdPath, sdName) {
-  // .launcher.yml dans le sous-dossier
+  // .launcher.yml in the sub-folder
   const cfgPath = path.join(sdPath, config.configFile);
   if (fs.existsSync(cfgPath)) {
     try {
@@ -558,7 +558,7 @@ function resolveComponent(sdPath, sdName) {
       }
     } catch {}
   }
-  // Auto-détection
+  // Auto-detection
   let sdEntries;
   try { sdEntries = fs.readdirSync(sdPath, { withFileTypes: true }); } catch { return null; }
   const detected = detectProject(sdPath, sdEntries);
@@ -592,11 +592,11 @@ function scanProjects(push) {
     }
 
     const folderName  = path.basename(dir);
-    const displayName = smartName(dir);           // ← nom intelligent (remonte si générique)
+    const displayName = smartName(dir);           // ← smart name (climbs up if generic)
     const relDir      = path.relative(settings.devRoot, dir) || '.';
     const id          = Buffer.from(dir).toString('base64url');
 
-    // ── 1. .launcher.yml (priorité absolue) ──────────────────────────────────
+    // ── 1. .launcher.yml (absolute priority) ─────────────────────────────────
     const configPath = path.join(dir, config.configFile);
     if (fs.existsSync(configPath)) {
       try {
@@ -613,7 +613,7 @@ function scanProjects(push) {
       }
     }
 
-    // ── 2. Auto-détection directe ─────────────────────────────────────────────
+    // ── 2. Direct auto-detection ──────────────────────────────────────────────
     const detected = detectProject(dir, entries);
     if (detected) {
       const nameNote = displayName !== folderName ? ` ${t('scan.log.folderNote', undefined, { name: folderName })}` : '';
@@ -622,14 +622,14 @@ function scanProjects(push) {
       return;
     }
 
-    // ── 3. Détection multi-composants ─────────────────────────────────────────
-    // Si la majorité des sous-dossiers sont des projets reconnus → un seul projet groupé
+    // ── 3. Multi-component detection ─────────────────────────────────────────
+    // If most sub-folders are recognized projects → one grouped project
     const subdirs = entries.filter(e => e.isDirectory() && !settings.ignoreDirs.includes(e.name) && !e.name.startsWith('.'));
 
     if (subdirs.length >= 2) {
-      // Ne grouper que si les sous-dossiers ont des noms de COMPOSANTS reconnus
-      // (frontend, backend, api…). Cela évite de grouper des dossiers "catégorie"
-      // comme RAC/ qui contient des projets indépendants.
+      // Only group if sub-folders have recognized COMPONENT names
+      // (frontend, backend, api…). This avoids grouping "category" folders
+      // like RAC/ which contains independent projects.
       const componentCandidates = subdirs.filter(sd =>
         COMPONENT_NAMES.has(sd.name.toLowerCase())
       );
@@ -641,7 +641,7 @@ function scanProjects(push) {
       const ratio = componentCandidates.length / subdirs.length;
 
       if (subComps.length >= 2 && ratio >= 0.5) {
-        // Construire les commandes groupées : "composant-clé"
+        // Build grouped commands: "component-key"
         const commands = {};
         const allComponents = new Set(['multi']);
 
@@ -651,19 +651,19 @@ function scanProjects(push) {
             commands[`${comp.name}-${key}`] = {
               ...cmd,
               label: `${comp.name} · ${cmd.label || key}`,
-              cwd: comp.name,  // relatif au dossier parent
+              cwd: comp.name,  // relative to the parent folder
             };
           }
         }
 
-        // Si le parent a aussi un docker-compose, l'ajouter en premier
+        // If the parent also has a docker-compose, add it first
         const dcFile = entries.find(e => e.name === 'docker-compose.yml' || e.name === 'docker-compose.yaml');
         if (dcFile) {
           commands['docker-up']    = { label: '🐳 Docker Compose up', cmd: `docker-compose -f ${dcFile.name} up` };
           commands['docker-build'] = { label: '🐳 Docker Compose up --build', cmd: `docker-compose -f ${dcFile.name} up --build` };
           commands['docker-down']  = { label: '🐳 Docker Compose down', cmd: `docker-compose -f ${dcFile.name} down` };
           allComponents.add('docker');
-          // Réordonner : docker en premier
+          // Reorder: docker first
           const reordered = {};
           ['docker-up', 'docker-build', 'docker-down'].forEach(k => { reordered[k] = commands[k]; delete commands[k]; });
           Object.assign(reordered, commands);
@@ -687,7 +687,7 @@ function scanProjects(push) {
       }
     }
 
-    // ── 4. Descendre normalement ──────────────────────────────────────────────
+    // ── 4. Recurse normally ───────────────────────────────────────────────────
     if (subdirs.length > 0) {
       const subfolderKey = subdirs.length > 1 ? 'scan.log.subfoldersMany' : 'scan.log.subfoldersOne';
       emit('explore', t(subfolderKey, undefined, { dir: relDir, count: subdirs.length }));
@@ -707,14 +707,14 @@ function scanProjects(push) {
 
 // ─── Last activity ────────────────────────────────────────────────────────────
 
-// Cache de la dernière activité (TTL court). getLastActivity lance un `git log`
-// synchrone par projet ; sans cache, GET /api/projects bloque l'event loop
-// proportionnellement au nombre de projets à chaque appel.
+// Short-TTL last-activity cache. getLastActivity runs a synchronous `git log`
+// per project; without a cache, GET /api/projects blocks the event loop
+// proportionally to the number of projects on every call.
 const activityCache = new Map(); // dir -> { value, expires }
 const ACTIVITY_TTL = 15000;      // 15 s
 
-// Retourne le timestamp (ms) de la dernière activité sur le projet.
-// Priorité : dernier commit git > mtime max des fichiers du premier niveau.
+// Returns the timestamp (ms) of the last activity on the project.
+// Priority: latest git commit > max mtime of top-level files.
 function getLastActivity(dir, hasGit) {
   const cached = activityCache.get(dir);
   if (cached && cached.expires > Date.now()) return cached.value;
@@ -734,7 +734,7 @@ function computeLastActivity(dir, hasGit) {
     } catch {}
   }
 
-  // Fallback : mtime max des entrées directes (hors ignoreDirs)
+  // Fallback: max mtime of direct entries (excluding ignoreDirs)
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     let max = 0;
@@ -751,31 +751,31 @@ function computeLastActivity(dir, hasGit) {
   return { ts: null, source: null };
 }
 
-// Convertit une URL remote git (SSH ou HTTPS) en URL web navigable
+// Converts a git remote URL (SSH or HTTPS) into a navigable web URL
 function remoteToWebUrl(remote, provider) {
   if (!remote) return null;
 
-  // Déjà une URL HTTPS → nettoyer le .git final
+  // Already an HTTPS URL → strip the trailing .git
   if (remote.startsWith('https://') || remote.startsWith('http://')) {
     return remote.replace(/\.git$/, '');
   }
 
-  // Azure SSH : git@ssh.dev.azure.com:v3/org/project/repo
+  // Azure SSH: git@ssh.dev.azure.com:v3/org/project/repo
   if (provider === 'azure' && remote.startsWith('git@ssh.dev.azure.com')) {
     const m = remote.match(/git@ssh\.dev\.azure\.com:v3\/([^/]+)\/([^/]+)\/(.+)/);
     if (m) return `https://dev.azure.com/${m[1]}/${m[2]}/_git/${m[3].replace(/\.git$/, '')}`;
   }
 
-  // SSH standard : git@host:user/repo.git  ou  git@host:org/project/repo.git
+  // Standard SSH: git@host:user/repo.git  or  git@host:org/project/repo.git
   const sshMatch = remote.match(/^git@([^:]+):(.+?)(?:\.git)?$/);
   if (sshMatch) {
     const [, host, repoPath] = sshMatch;
     return `https://${host}/${repoPath}`;
   }
 
-  // SCP-like sans git@ : host:path
+  // SCP-like without git@: host:path
   const scpMatch = remote.match(/^([a-zA-Z0-9._-]+):(.+?)(?:\.git)?$/);
-  if (scpMatch) return null; // chemin local probable, pas navigable
+  if (scpMatch) return null; // likely a local path, not navigable
 
   return null;
 }
@@ -821,9 +821,9 @@ app.get('/api/projects', (req, res) => {
         .map(cid => categoriesData.categories.find(c => c.id === cid))
         .filter(Boolean);
 
-      // Schéma canonique garanti par la migration au démarrage ; normalizeProject
-      // reste appliqué ici par sécurité (idempotent) au cas où une entrée non migrée
-      // aurait été ajoutée entre-temps.
+      // Canonical schema is guaranteed by the startup migration; normalizeProject
+      // is still applied here as a safety net (idempotent) in case an un-migrated
+      // entry was added in the meantime.
       const np = normalizeProject(p);
 
       return {
@@ -842,7 +842,7 @@ app.get('/api/projects', (req, res) => {
   }
 });
 
-// SSE : scan avec progression en temps réel
+// SSE: scan with real-time progress
 app.get('/api/scan-stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -855,7 +855,7 @@ app.get('/api/scan-stream', (req, res) => {
 
   try {
     const projects = scanProjects(send);
-    // Marquer chaque projet comme importé ou nouveau
+    // Mark each project as imported or new
     const marked = projects.map(p => ({
       ...p,
       imported: registry.some(r => r.id === p.id || r.path === p.path),
@@ -936,7 +936,7 @@ app.get('/api/logs/:instanceId', (req, res) => {
   req.on('close', () => { instance.sseClients = instance.sseClients.filter(c => c !== res); });
 });
 
-// Ouvrir le dossier dans l'explorateur de fichiers (cross-platform)
+// Open the folder in the file explorer (cross-platform)
 app.post('/api/open-folder', (req, res) => {
   const { projectId } = req.body;
   const project = registry.find(p => p.id === projectId);
@@ -951,7 +951,7 @@ app.post('/api/open-folder', (req, res) => {
   res.json({ ok: true });
 });
 
-// Ouvrir un projet dans VS Code
+// Open a project in the editor
 app.post('/api/open-editor', (req, res) => {
   const { projectId, ideId } = req.body;
   const project = registry.find(p => p.id === projectId);
@@ -969,7 +969,7 @@ app.post('/api/open-editor', (req, res) => {
   res.json({ ok: true });
 });
 
-// Définir l'IDE préféré d'un projet
+// Set the preferred IDE for a project
 app.patch('/api/projects/:id/ide', (req, res) => {
   const { ideId } = req.body;
   const project = registry.find(p => p.id === req.params.id);
@@ -985,18 +985,18 @@ app.patch('/api/projects/:id/ide', (req, res) => {
 
 app.get('/api/categories', (req, res) => res.json(categoriesData));
 
-// Créer ou modifier une catégorie
+// Create or update a category
 app.post('/api/categories', (req, res) => {
   const { id, name, color } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: t('error.nameRequired') });
   if (id) {
-    // Mise à jour
+    // Update
     const cat = categoriesData.categories.find(c => c.id === id);
     if (!cat) return res.status(404).json({ error: t('error.categoryNotFound') });
     cat.name  = name.trim();
     cat.color = color || cat.color;
   } else {
-    // Création
+    // Create
     const newCat = { id: `cat_${Date.now()}`, name: name.trim(), color: color || '#6366f1' };
     categoriesData.categories.push(newCat);
   }
@@ -1004,11 +1004,11 @@ app.post('/api/categories', (req, res) => {
   res.json(categoriesData);
 });
 
-// Supprimer une catégorie
+// Delete a category
 app.delete('/api/categories/:id', (req, res) => {
   const { id } = req.params;
   categoriesData.categories = categoriesData.categories.filter(c => c.id !== id);
-  // Nettoyer les assignations
+  // Clean up assignments
   for (const pid of Object.keys(categoriesData.assignments)) {
     categoriesData.assignments[pid] = categoriesData.assignments[pid].filter(cid => cid !== id);
     if (!categoriesData.assignments[pid].length) delete categoriesData.assignments[pid];
@@ -1017,7 +1017,7 @@ app.delete('/api/categories/:id', (req, res) => {
   res.json(categoriesData);
 });
 
-// Assigner / désassigner une catégorie à un projet
+// Assign / unassign a category to a project
 app.post('/api/categories/assign', (req, res) => {
   const { projectId, categoryId, action } = req.body; // action: 'add' | 'remove'
   if (!projectId || !categoryId) return res.status(400).json({ error: t('error.projectIdAndCategoryIdRequired') });
@@ -1034,7 +1034,7 @@ app.post('/api/categories/assign', (req, res) => {
 
 // ─── Registry API ─────────────────────────────────────────────────────────────
 
-// Détecter les propriétés d'un chemin (sans l'importer)
+// Detect the properties of a path (without importing it)
 app.post('/api/projects/detect', (req, res) => {
   let dirPath = (req.body.path || '').trim();
   if (!dirPath) return res.status(400).json({ error: t('error.pathRequired') });
@@ -1052,7 +1052,7 @@ app.post('/api/projects/detect', (req, res) => {
   try { entries = fs.readdirSync(dirPath, { withFileTypes: true }); }
   catch (e) { return res.status(400).json({ error: t('error.cannotRead', undefined, { msg: e.message }) }); }
 
-  // .launcher.yml priorité absolue
+  // .launcher.yml absolute priority
   const cfgPath = path.join(dirPath, config.configFile);
   if (fs.existsSync(cfgPath)) {
     try {
@@ -1067,7 +1067,7 @@ app.post('/api/projects/detect', (req, res) => {
     } catch {}
   }
 
-  // Auto-détection
+  // Auto-detection
   const detected = detectProject(dirPath, entries);
   const folderName = path.basename(dirPath);
   const displayName = smartName(dirPath);
@@ -1079,12 +1079,12 @@ app.post('/api/projects/detect', (req, res) => {
       source: 'auto', alreadyImported });
   }
 
-  // Rien détecté — info minimale
+  // Nothing detected — minimal info
   return res.json({ id, path: dirPath, name: folderName, description: '',
     components: [], suggestedType: 'unknown', color: null, commands: {}, source: 'manual', alreadyImported });
 });
 
-// Importer un projet dans le registre
+// Import a project into the registry
 app.post('/api/projects', (req, res) => {
   let { path: dirPath, name, description, components, type, color, commands, source } = req.body;
   if (!dirPath || !name?.trim()) return res.status(400).json({ error: t('error.pathAndNameRequired') });
@@ -1113,7 +1113,7 @@ app.post('/api/projects', (req, res) => {
   res.status(201).json(newProject);
 });
 
-// Mettre à jour un projet du registre
+// Update a project in the registry
 app.put('/api/projects/:id', (req, res) => {
   const { id } = req.params;
   const idx = registry.findIndex(p => p.id === id);
@@ -1136,7 +1136,7 @@ app.put('/api/projects/:id', (req, res) => {
   res.json(updated);
 });
 
-// Supprimer un projet du registre
+// Remove a project from the registry
 app.delete('/api/projects/:id', (req, res) => {
   const { id } = req.params;
   const idx = registry.findIndex(p => p.id === id);
@@ -1145,11 +1145,11 @@ app.delete('/api/projects/:id', (req, res) => {
   registry.splice(idx, 1);
   saveRegistry();
 
-  // Nettoyer les assignations de catégories
+  // Clean up category assignments
   delete categoriesData.assignments[id];
   persistCategories();
 
-  // Tuer les instances en cours pour ce projet
+  // Kill running instances for this project
   for (const [key, inst] of instances) {
     if (key.startsWith(id + '__')) {
       inst.process.kill('SIGTERM');
@@ -1164,7 +1164,7 @@ app.delete('/api/projects/:id', (req, res) => {
 
 app.get('/api/pick-folder', async (req, res) => {
   let dialog;
-  try { dialog = require('electron').dialog; } catch { /* mode web */ }
+  try { dialog = require('electron').dialog; } catch { /* web mode */ }
   if (!dialog) return res.status(400).json({ error: 'native_unavailable' });
 
   const defaultPath = req.query.current
@@ -1192,9 +1192,9 @@ app.post('/api/settings', (req, res) => {
   try {
     const incoming = req.body;
 
-    // Validation basique
+    // Basic validation
     if (incoming.devRoot) {
-      // Expand ~ si nécessaire
+      // Expand ~ if needed
       incoming.devRoot = incoming.devRoot.replace(/^~/, os.homedir());
       if (!path.isAbsolute(incoming.devRoot)) {
         return res.status(400).json({ error: t('error.devRootMustBeAbsolute') });
@@ -1218,7 +1218,7 @@ app.post('/api/settings', (req, res) => {
   }
 });
 
-// Vérifier si un port est occupé
+// Check whether a port is in use
 app.get('/api/port-check/:port', (req, res) => {
   const port = parseInt(req.params.port, 10);
   if (!port || port < 1 || port > 65535) return res.status(400).json({ error: t('error.invalidPort') });
@@ -1245,7 +1245,7 @@ app.get('/api/status', (req, res) => {
   res.json(status);
 });
 
-// ─── SSE broadcast (données temps réel) ──────────────────────────────────────
+// ─── SSE broadcast (real-time data) ──────────────────────────────────────────
 
 const broadcastClients = new Set();
 
@@ -1255,7 +1255,7 @@ app.get('/api/events', (req, res) => {
   res.setHeader('Connection',    'keep-alive');
   res.flushHeaders();
 
-  // Heartbeat toutes les 30s pour garder la connexion vivante
+  // Heartbeat every 30s to keep the connection alive
   const hb = setInterval(() => res.write(': ping\n\n'), 30000);
 
   broadcastClients.add(res);
@@ -1267,7 +1267,7 @@ function broadcast(event, data) {
   broadcastClients.forEach(c => c.write(msg));
 }
 
-// ─── Favoris ─────────────────────────────────────────────────────────────────
+// ─── Favorites ───────────────────────────────────────────────────────────────
 
 const FAVORITES_FILE = path.join(__dirname, 'favorites.json');
 
@@ -1304,22 +1304,22 @@ app.delete('/api/favorites/:id', (req, res) => {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 
-// Écoute UNIQUEMENT sur la loopback (jamais 0.0.0.0). Ne pas changer sans
-// comprendre que /api/launch exécute des commandes shell arbitraires.
+// Listens ONLY on the loopback interface (never 0.0.0.0). Do not change without
+// understanding that /api/launch executes arbitrary shell commands.
 const server = app.listen(config.port, '127.0.0.1', () => {
   console.log(`\n🚀 Dev Launcher → http://localhost:${config.port}`);
-  console.log(`📁 Registre : ${registry.length} projet${registry.length !== 1 ? 's' : ''} importé${registry.length !== 1 ? 's' : ''}`);
+  console.log(`📁 Registry: ${registry.length} project${registry.length !== 1 ? 's' : ''} imported`);
   if (registry.length > 0) {
     registry.forEach(p => console.log(`  ✅ ${p.name}   ${p.path}`));
   } else {
-    console.log('  ℹ️  Aucun projet dans le registre — utilisez "Ajouter" ou "Scan" pour importer des projets.');
+    console.log('  ℹ️  No projects in the registry — use "Add" or "Scan" to import projects.');
   }
   console.log('');
 });
 
-// ─── Arrêt propre ───────────────────────────────────────────────────────────
-// Tue les commandes lancées pour ne pas laisser de processus orphelins quand le
-// serveur (ou l'app Electron) s'arrête.
+// ─── Graceful shutdown ───────────────────────────────────────────────────────
+// Kills launched commands to avoid leaving orphan processes when the
+// server (or Electron app) shuts down.
 function killAllInstances(signal = 'SIGTERM') {
   for (const inst of instances.values()) {
     try { inst.process.kill(signal); } catch {}
@@ -1332,12 +1332,12 @@ function shutdownStandalone() {
   if (shuttingDown) return;
   shuttingDown = true;
   killAllInstances('SIGTERM');
-  // Court délai pour laisser le SIGTERM se propager avant de quitter.
+  // Brief delay to let SIGTERM propagate before exiting.
   setTimeout(() => process.exit(0), 300).unref();
 }
 
 process.on('SIGINT',  shutdownStandalone);
 process.on('SIGTERM', shutdownStandalone);
 
-// Exporté pour qu'Electron puisse nettoyer les processus sur app.before-quit.
+// Exported so Electron can clean up processes on app.before-quit.
 module.exports = { killAllInstances, server };
