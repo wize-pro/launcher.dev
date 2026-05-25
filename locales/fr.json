@@ -208,5 +208,9 @@
   "launch.portBusy.message": "Quelque chose écoute déjà sur le port {port}.",
   "launch.portBusy.openExisting": "Ouvrir le serveur existant",
   "launch.portBusy.launchAnyway": "Lancer quand même",
-  "launch.portBusy.cancel": "Annuler"
+  "launch.portBusy.cancel": "Annuler",
+  "git.branch.title": "Branche courante",
+  "git.dirty.title": "Modifications non commitées",
+  "git.ahead.title": "{n} commit(s) en avance sur l'upstream",
+  "git.behind.title": "{n} commit(s) en retard sur l'upstream"
 }
