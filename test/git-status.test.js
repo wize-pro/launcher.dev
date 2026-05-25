@@ -29,3 +29,17 @@ test('detached HEAD → short oid as branch', () => {
 test('empty output → null branch, not dirty', () => {
   assert.deepStrictEqual(parseGitStatus(''), { branch: null, dirty: false, ahead: null, behind: null });
 });
+
+test('upstream tracked but no branch.ab line → ahead/behind null', () => {
+  const out = '# branch.oid abc\n# branch.head main\n# branch.upstream origin/main\n';
+  const s = parseGitStatus(out);
+  assert.strictEqual(s.ahead, null);
+  assert.strictEqual(s.behind, null);
+});
+
+test('branch.ab +0 -0 → ahead/behind are 0 (in sync), distinct from null', () => {
+  const out = '# branch.head main\n# branch.upstream origin/main\n# branch.ab +0 -0\n';
+  const s = parseGitStatus(out);
+  assert.strictEqual(s.ahead, 0);
+  assert.strictEqual(s.behind, 0);
+});
