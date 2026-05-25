@@ -42,7 +42,7 @@ async function launch(projectId, commandKey, iid) {
       if (inUse) {
         const act = await portBusyModal(port);
         if (act === 'cancel') return;
-        if (act === 'open') { openUrl(`http://localhost:${port}`); return; }
+        if (act === 'open') { await openUrl(`http://localhost:${port}`); return; }
         // act === 'launch' → fall through to launch
       }
     } catch { /* port-check failed → launch normally */ }
