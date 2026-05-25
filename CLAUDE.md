@@ -20,7 +20,9 @@ Launcher/
 ├── server.js            # Express: all backend logic + REST API + SSE
 ├── launcher.config.js   # Static config (devRoot, port 4242, scanDepth, ignoreDirs)
 ├── public/
-│   ├── index.html       # Complete frontend — CSS + JS inline, single-file
+│   ├── index.html       # Frontend markup + ordered <script src> tags (+ tiny theme-flash inline script)
+│   ├── styles.css       # All frontend CSS
+│   ├── js/              # Frontend JS — classic ordered scripts (state→…→init), global scope, no bundler
 │   └── i18n.js          # Shared translate/detectLang module (server + browser)
 ├── locales/
 │   ├── en.json          # Base language (English) — source of truth for keys
@@ -44,7 +46,7 @@ Launcher/
 
 **server.js** is self-contained: it can run standalone (`node server.js`) or inside Electron. It depends on no Electron API *except* `/api/pick-folder`, which does `require('electron').dialog` with a try/catch to degrade silently in web mode.
 
-**The frontend** (`public/index.html`) is a single file — all CSS and JS are inline. No bundler, no framework. Edit this file directly.
+**The frontend** is `public/index.html` (markup only) + `public/styles.css` (all CSS) + `public/js/*.js` (the JS, split by concern: `state, projects, render, launch, scan, categories, settings, import, init`). No bundler, no framework: the JS files are **classic scripts** (not ES modules) loaded in order via `<script src>`, so they share one global scope — `state.js` must load first (top-level state vars) and `init.js` last (boot sequence). Because scope is global, inline `onclick=`/`onchange=` handlers in the markup and in render template literals call these functions directly. A tiny theme-flash-prevention `<script>` stays inline in `<head>`.
 
 ## Security model
 
@@ -155,7 +157,7 @@ Tests live in `test/` and use Node's built-in `node --test` runner — no test f
 
 ## Conventions
 
-- **No bundler** — the frontend is a single HTML file with inline CSS/JS
+- **No bundler** — `index.html` (markup) + `styles.css` + `public/js/*.js` (classic ordered scripts, global scope)
 - **No frontend framework** — vanilla JS with template literals for dynamic HTML
 - **Simplicity first** — avoid adding unnecessary dependencies
 - The theme (dark/light) and language preference are the two client-cached prefs: `localStorage` keys `dlTheme` and `dlLang`. Language is also backed by `settings.json` (`lang`). Everything else is server-side.
