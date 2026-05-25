@@ -1,4 +1,14 @@
 // ══ Launch / Stop ══════════════════════════════════════════════════════════
+async function openUrl(url) {
+  try {
+    const r = await fetch('/api/open-url', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    if (!r.ok) { window.open(url, '_blank'); }   // web mode / native unavailable → new tab
+  } catch { window.open(url, '_blank'); }
+}
+
 async function launch(projectId, commandKey, iid) {
   try {
     const r = await fetch('/api/launch', {

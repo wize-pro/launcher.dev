@@ -564,6 +564,7 @@ function buildInlineActions(p, cmds) {
       runningCmds.slice(0,2).forEach(([key,cmd])=>{
         const iid = `${p.id}__${key}`;
         html += `<button class="cbtn running-btn" onclick="openTab('${iid}')">📋 ${cmd.label||key}</button>`;
+        if (cmd.port) html += `<button class="cbtn open-btn" title="${t('cmd.open.title',{port:cmd.port})}" onclick="openUrl('http://localhost:${cmd.port}')">↗ ${t('cmd.open.label')}</button>`;
         html += `<button class="cbtn stop-btn" onclick="stopCmd('${p.id}','${key}','${iid}')">■ Stop</button>`;
       });
     }
@@ -579,6 +580,7 @@ function buildInlineActions(p, cmds) {
     const isRun = p.runningCommands?.includes(key);
     if (isRun) {
       html += `<button class="cbtn running-btn" onclick="openTab('${iid}')">📋 Logs</button>`;
+      if (cmd.port) html += `<button class="cbtn open-btn" title="${t('cmd.open.title',{port:cmd.port})}" onclick="openUrl('http://localhost:${cmd.port}')">↗ ${t('cmd.open.label')}</button>`;
       html += `<button class="cbtn stop-btn" onclick="stopCmd('${p.id}','${key}','${iid}')">■ Stop</button>`;
     } else {
       const cls = i===0?'primary':'';
@@ -633,6 +635,7 @@ function expCmdHtml(p, key, cmd) {
       ${cmd.port?`<span class="ec-port">${portHtml(cmd.port)}</span>`:''}
       <div class="ec-actions">
         <button class="ec-logs" onclick="openTab('${iid}')">Logs</button>
+        ${cmd.port?`<button class="ec-logs" title="${t('cmd.open.title',{port:cmd.port})}" onclick="openUrl('http://localhost:${cmd.port}')">↗ ${t('cmd.open.label')}</button>`:''}
         <button class="ec-stop" onclick="stopCmd('${p.id}','${key}','${iid}')">■ Stop</button>
       </div>
     </div>`;
