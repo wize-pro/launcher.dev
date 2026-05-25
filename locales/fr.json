@@ -27,6 +27,7 @@
   "error.ignoreDirsMustBeArray": "ignoreDirs doit être un tableau",
   "error.unknownLanguageCode": "Code de langue inconnu",
   "error.invalidPort": "Port invalide",
+  "error.invalidUrl": "URL invalide ou non locale",
   "header.search.placeholder": "Rechercher un projet…",
   "header.running": "en cours",
   "header.add.title": "Ajouter un projet manuellement",
@@ -199,5 +200,13 @@
   "launch.log.processExited": "⬛ Process terminé (code: {code})",
   "launch.log.processError": "❌ Erreur: {msg}",
   "dialog.pickFolder.title": "Sélectionner un dossier",
-  "dialog.pickFolder.button": "Choisir"
+  "dialog.pickFolder.button": "Choisir",
+  "cmd.open.label": "Ouvrir",
+  "cmd.open.title": "Ouvrir http://localhost:{port} dans le navigateur",
+  "project.running": "en cours",
+  "launch.portBusy.title": "Le port {port} est déjà utilisé",
+  "launch.portBusy.message": "Quelque chose écoute déjà sur le port {port}.",
+  "launch.portBusy.openExisting": "Ouvrir le serveur existant",
+  "launch.portBusy.launchAnyway": "Lancer quand même",
+  "launch.portBusy.cancel": "Annuler"
 }

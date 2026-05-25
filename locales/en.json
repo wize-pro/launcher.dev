@@ -27,6 +27,7 @@
   "error.ignoreDirsMustBeArray": "ignoreDirs must be an array",
   "error.unknownLanguageCode": "Unknown language code",
   "error.invalidPort": "Invalid port",
+  "error.invalidUrl": "Invalid or non-local URL",
   "header.search.placeholder": "Search a project…",
   "header.running": "running",
   "header.add.title": "Add a project manually",
@@ -199,5 +200,13 @@
   "launch.log.processExited": "⬛ Process exited (code: {code})",
   "launch.log.processError": "❌ Error: {msg}",
   "dialog.pickFolder.title": "Select a folder",
-  "dialog.pickFolder.button": "Choose"
+  "dialog.pickFolder.button": "Choose",
+  "cmd.open.label": "Open",
+  "cmd.open.title": "Open http://localhost:{port} in your browser",
+  "project.running": "running",
+  "launch.portBusy.title": "Port {port} is already in use",
+  "launch.portBusy.message": "Something is already listening on port {port}.",
+  "launch.portBusy.openExisting": "Open existing server",
+  "launch.portBusy.launchAnyway": "Launch anyway",
+  "launch.portBusy.cancel": "Cancel"
 }
