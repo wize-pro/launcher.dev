@@ -288,6 +288,16 @@ function gitIconHtml(git) {
   return `<span class="git-icon" title="${(def.tip).replace(/"/g,'&quot;')}">${inner}</span>`;
 }
 
+function gitStatusHtml(git) {
+  if (!git || !git.hasGit || !git.branch) return '';
+  const parts = [`${t('git.branch.title')}: ${git.branch}`];
+  let inner = `<span class="branch-name">⎇ ${escHtml(git.branch)}</span>`;
+  if (git.dirty) { inner += `<span class="git-dirty">●</span>`; parts.push(t('git.dirty.title')); }
+  if (git.ahead > 0)  { inner += `<span class="git-ab">↑${git.ahead}</span>`;  parts.push(t('git.ahead.title', { n: git.ahead })); }
+  if (git.behind > 0) { inner += `<span class="git-ab">↓${git.behind}</span>`; parts.push(t('git.behind.title', { n: git.behind })); }
+  return `<span class="git-status" title="${escHtml(parts.join(' · '))}">${inner}</span>`;
+}
+
 // ══ Port HTML helper ═══════════════════════════════════════════════════════
 function portHtml(port) {
   const isConflict = portConflicts.has(port);
@@ -512,6 +522,7 @@ function rowHtml(p) {
     <div class="col-name">
       <span class="prow-name">${p.name}</span>
       ${gitIconHtml(p.git)}
+      ${gitStatusHtml(p.git)}
       ${badge}
       ${isRunning ? `<span class="run-badge" title="${t('project.running')}">● ${t('project.running')}${(() => { const rp = (p.runningCommands||[]).map(k => p.commands?.[k]?.port).find(Boolean); return rp ? ' :' + rp : ''; })()}</span>` : ''}
     </div>

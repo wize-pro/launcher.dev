@@ -1203,3 +1203,7 @@ a.git-icon:hover{opacity:1;transform:scale(1.15)}
 .stdout{color:#c8d8f8}
 .stderr{color:#fca5a5}
 .system{color:var(--t3);font-style:italic}
+.git-status{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx);opacity:.6;margin-left:6px}
+.git-status .branch-name{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.git-status .git-dirty{color:var(--ac);opacity:1}
+.git-status .git-ab{font-weight:600;opacity:.85}
