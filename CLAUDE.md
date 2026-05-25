@@ -81,6 +81,7 @@ The port defaults to `4242` and is overridable via the `PORT` environment variab
 | DELETE | `/api/favorites/:id` | Remove a favorite |
 | POST | `/api/open-editor` | Open project in IDE (body: `projectId`, optional `ideId`) |
 | POST | `/api/open-folder` | Open project folder in file explorer (cross-platform) |
+| POST | `/api/open-url` | Open a loopback http(s) URL in the external browser (Electron; 400 in web mode) |
 | GET | `/api/pick-folder` | Native folder picker dialog (Electron only) |
 | GET | `/api/settings` | Read current settings |
 | POST | `/api/settings` | Save settings (also reloads catalogs) |
