@@ -32,3 +32,4 @@ Live board: <https://github.com/users/wize-pro/projects/1>
 - [ ] #18 Native notifications on command completion/crash (Electron) — _enhancement_
 - [ ] #19 Compound launch / profiles: start a group of projects together — _enhancement_
 - [ ] #20 Edit custom commands per project from the UI — _enhancement_
+- [ ] #22 Category filter counts show 0 on cold load until next render — _bug_
