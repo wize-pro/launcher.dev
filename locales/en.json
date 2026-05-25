@@ -208,5 +208,9 @@
   "launch.portBusy.message": "Something is already listening on port {port}.",
   "launch.portBusy.openExisting": "Open existing server",
   "launch.portBusy.launchAnyway": "Launch anyway",
-  "launch.portBusy.cancel": "Cancel"
+  "launch.portBusy.cancel": "Cancel",
+  "git.branch.title": "Current branch",
+  "git.dirty.title": "Uncommitted changes",
+  "git.ahead.title": "{n} commit(s) ahead of upstream",
+  "git.behind.title": "{n} commit(s) behind upstream"
 }
