@@ -243,6 +243,26 @@ module.exports = (ctx) => {
     res.json({ ok: true });
   });
 
+  // ─── Open a loopback URL in the external browser (Electron only) ─────────────
+
+  r.post('/api/open-url', (req, res) => {
+    const { url } = req.body || {};
+    let parsed;
+    try { parsed = new URL(String(url)); } catch { return res.status(400).json({ error: ctx.t('error.invalidUrl') }); }
+    // WHATWG URL always brackets an IPv6 host, so [::1] (not bare ::1) is what hostname yields.
+    const loopback = new Set(['localhost', '127.0.0.1', '[::1]']);
+    if (!['http:', 'https:'].includes(parsed.protocol) || !loopback.has(parsed.hostname)) {
+      return res.status(400).json({ error: ctx.t('error.invalidUrl') });
+    }
+    let shell;
+    try { shell = require('electron').shell; } catch { /* web mode */ }
+    if (!shell) return res.status(400).json({ error: 'native_unavailable' });
+    // Open a reconstructed URL (drop any userinfo/fragment) so what we open matches what we validated.
+    const safe = `${parsed.protocol}//${parsed.hostname}${parsed.port ? ':' + parsed.port : ''}${parsed.pathname}${parsed.search}`;
+    shell.openExternal(safe);
+    res.json({ ok: true });
+  });
+
   // ─── Native folder picker (Electron only) ─────────────────────────────────────
 
   r.get('/api/pick-folder', async (req, res) => {

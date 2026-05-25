@@ -1,5 +1,52 @@
 // ══ Launch / Stop ══════════════════════════════════════════════════════════
+async function openUrl(url) {
+  try {
+    const r = await fetch('/api/open-url', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    if (!r.ok) { window.open(url, '_blank'); }   // web mode / native unavailable → new tab
+  } catch { window.open(url, '_blank'); }
+}
+
+function portBusyModal(port) {
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
+    ov.innerHTML = `
+      <div style="background:var(--bg);color:var(--tx);border:1px solid var(--bd,#3334);border-radius:10px;max-width:380px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.4)">
+        <div style="font-weight:600;margin-bottom:6px">${t('launch.portBusy.title',{port})}</div>
+        <div style="opacity:.8;font-size:13px;margin-bottom:16px">${t('launch.portBusy.message',{port})}</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+          <button data-act="cancel" class="cbtn">${t('launch.portBusy.cancel')}</button>
+          <button data-act="launch" class="cbtn">${t('launch.portBusy.launchAnyway')}</button>
+          <button data-act="open" class="cbtn primary">${t('launch.portBusy.openExisting')}</button>
+        </div>
+      </div>`;
+    const done = (act) => { ov.remove(); resolve(act); };
+    ov.addEventListener('click', e => {
+      if (e.target === ov) return done('cancel');
+      const act = e.target.closest('button')?.dataset.act;
+      if (act) done(act);
+    });
+    document.body.appendChild(ov);
+  });
+}
+
 async function launch(projectId, commandKey, iid) {
+  const project = allProjects.find(p => p.id === projectId);
+  const port = project?.commands?.[commandKey]?.port;
+  if (port) {
+    try {
+      const { inUse } = await fetch(`/api/port-check/${port}`).then(r => r.json());
+      if (inUse) {
+        const act = await portBusyModal(port);
+        if (act === 'cancel') return;
+        if (act === 'open') { await openUrl(`http://localhost:${port}`); return; }
+        // act === 'launch' → fall through to launch
+      }
+    } catch { /* port-check failed → launch normally */ }
+  }
   try {
     const r = await fetch('/api/launch', {
       method:'POST', headers:{'Content-Type':'application/json'},
