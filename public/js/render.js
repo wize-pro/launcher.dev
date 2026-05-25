@@ -513,6 +513,7 @@ function rowHtml(p) {
       <span class="prow-name">${p.name}</span>
       ${gitIconHtml(p.git)}
       ${badge}
+      ${isRunning ? `<span class="run-badge" title="${t('project.running')}">● ${t('project.running')}${(() => { const rp = (p.runningCommands||[]).map(k => p.commands?.[k]?.port).find(Boolean); return rp ? ' :' + rp : ''; })()}</span>` : ''}
     </div>
 
     <!-- col 3: path -->
