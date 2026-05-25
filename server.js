@@ -57,6 +57,7 @@ const ctx = {
   t, broadcast,
   scanProjects: (push) => scanner.scanProjects(push, { settings: store.settings, t }),
   detectGit: gitLib.detectGit,
+  getGitStatus: gitLib.getGitStatus,
   getLastActivity: (dir, hasGit) => gitLib.getLastActivity(dir, hasGit, { ignoreDirs: store.settings.ignoreDirs }),
   resolveIdeExec,
   saveSettings: (data) => settingsLib.saveSettings(SETTINGS_FILE, data),

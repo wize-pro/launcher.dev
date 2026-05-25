@@ -14,6 +14,7 @@ module.exports = (ctx) => {
     try {
       const enriched = ctx.store.registry.map(p => {
         const git = ctx.detectGit(p.path);
+        if (git.hasGit) Object.assign(git, ctx.getGitStatus(p.path) || {});
         const activity = ctx.getLastActivity(p.path, git.hasGit);
         const assignedCatIds = ctx.store.categories.assignments[p.id] || [];
         const categories = assignedCatIds
