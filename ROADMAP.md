@@ -26,7 +26,7 @@ Live board: <https://github.com/users/wize-pro/projects/1>
 - [ ] #11 Make server tests self-contained (temp DATA_DIR) to remove serial-run constraint — _enhancement_
 - [x] #12 Modularize server.js into lib/ + routes/ — _enhancement_
 - [x] #13 Extract CSS and JS from index.html into native files/modules — _enhancement_
-- [ ] #15 Running-server awareness: status badge, open-in-browser, port-conflict warning — _enhancement_
+- [x] #15 Running-server awareness: status badge, open-in-browser, port-conflict warning — _enhancement_
 - [ ] #16 Command palette + global hotkey (keyboard-first quick launch) — _enhancement_
 - [ ] #17 Per-project git status: branch + dirty/ahead-behind indicator — _enhancement_
 - [ ] #18 Native notifications on command completion/crash (Electron) — _enhancement_
